@@ -1,5 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 
+function getAppOrigin(request: NextRequest) {
+  // Dominio canónico (configuralo en Netlify)
+  const appUrl =
+    process.env.NEXT_PUBLIC_APP_URL ||
+    process.env.SITE_URL ||
+    "https://streamerscreators.netlify.app";
+
+  return new URL(appUrl).origin;
+}
+
 export async function GET(request: NextRequest) {
   console.log("🔵 Callback de Discord iniciado");
 
@@ -12,9 +22,11 @@ export async function GET(request: NextRequest) {
   console.log("📝 Código recibido:", code);
   console.log("🏠 Guild (server) elegido:", guildId);
 
+  const origin = getAppOrigin(request);
+
   if (!code) {
     console.error("❌ No se recibió código");
-    return NextResponse.redirect(new URL("/?error=no_code", request.url));
+    return NextResponse.redirect(new URL("/?error=no_code", origin));
   }
 
   try {
@@ -64,7 +76,7 @@ export async function GET(request: NextRequest) {
     });
 
     const guilds = await guildsResponse.json();
-    console.log("✅ Servidores encontrados:", guilds.length);
+    console.log("✅ Servidores encontrados:", Array.isArray(guilds) ? guilds.length : 0);
 
     const discordData = {
       user: {
@@ -76,11 +88,11 @@ export async function GET(request: NextRequest) {
       accessToken: tokens.access_token,
       refreshToken: tokens.refresh_token,
       expiresIn: tokens.expires_in,
-      servers: (guilds || []).map((guild: any) => ({
+      servers: (Array.isArray(guilds) ? guilds : []).map((guild: any) => ({
         id: guild.id,
         name: guild.name,
-        icon: guild.icon,
-        owner: guild.owner,
+        icon: guild.icon ?? null,
+        owner: !!guild.owner,
         permissions: guild.permissions,
       })),
 
@@ -90,10 +102,10 @@ export async function GET(request: NextRequest) {
 
     const encodedData = encodeURIComponent(JSON.stringify(discordData));
 
-    console.log("🎉 Redirigiendo con datos...");
-    return NextResponse.redirect(new URL(`/?discord_data=${encodedData}`, request.url));
+    console.log("🎉 Redirigiendo con datos al dominio canónico:", origin);
+    return NextResponse.redirect(new URL(`/?discord_data=${encodedData}`, origin));
   } catch (error) {
     console.error("❌ Discord OAuth error:", error);
-    return NextResponse.redirect(new URL("/?error=discord_auth_failed", request.url));
+    return NextResponse.redirect(new URL("/?error=discord_auth_failed", origin));
   }
 }
