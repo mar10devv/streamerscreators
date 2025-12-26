@@ -1186,179 +1186,224 @@ export default function Home() {
             theme.shellBg,
           ].join(" ")}
         >
-          {/* ✅ Drawer (dentro del contenedor) */}
-          {drawerOpen && (
-            <div className="absolute inset-0 z-[70]">
-              <button
-                aria-label="Cerrar menú"
-                onClick={() => setDrawerOpen(false)}
-                className={[
-                  "absolute inset-0",
-                  "rounded-none sm:rounded-[40px]",
-                  theme.overlay,
-                ].join(" ")}
-                type="button"
-              />
+{/* ✅ Drawer */}
+{drawerOpen && (
+  <div className="absolute sm:fixed inset-0 z-[70]">
+    <button
+      aria-label="Cerrar menú"
+      onClick={() => setDrawerOpen(false)}
+      className={[
+        "absolute sm:fixed inset-0",
+        "rounded-none sm:rounded-[40px]",
+        theme.overlay,
+      ].join(" ")}
+      type="button"
+    />
 
-              <aside
-                className={[
-                  "absolute right-0 top-0 h-full w-[92%] max-w-md",
-                  "border-l backdrop-blur-xl",
-                  "p-6 flex flex-col gap-5",
-                  "rounded-l-[34px]",
-                  "overflow-y-auto",
-                  theme.drawerPanel,
-                ].join(" ")}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className={`text-xs ${theme.subtleText}`}>Cuenta</p>
-                    <p className="mt-1 text-base font-semibold">
-                      {user?.displayName || "Invitado"}
-                    </p>
-                    {user?.email && (
-                      <p className={`text-xs ${theme.subtleText}`}>{user.email}</p>
-                    )}
-                  </div>
+    <aside
+      className={[
+        "absolute sm:fixed right-0 top-0 h-full",
+        // ✅ ancho estable: mobile full / desktop fijo
+        "w-full sm:w-[420px] md:w-[460px]",
+        "border-l backdrop-blur-xl",
+        "px-4 py-4 sm:p-6",
+        "rounded-none sm:rounded-l-[34px]",
+        "overflow-y-auto",
+        "relative",
+        theme.drawerPanel,
+      ].join(" ")}
+    >
+      {/* ✅ Cerrar SIEMPRE visible en móvil (NO pisa desktop) */}
+      <button
+        onClick={() => setDrawerOpen(false)}
+        className={[
+          "sm:hidden",
+          "absolute right-3 top-3 z-10",
+          "h-10 w-10 rounded-2xl border",
+          "flex items-center justify-center",
+          "text-lg font-semibold leading-none",
+          theme.btnSecondary,
+        ].join(" ")}
+        type="button"
+        aria-label="Cerrar"
+      >
+        ✕
+      </button>
 
-                  {/* ✅ Arriba: Cerrar sesión donde antes estaba “Modo oscuro” */}
-                  <div className="flex items-center gap-2">
-                    {user && (
-                      <button
-                        onClick={() => {
-                          setDrawerOpen(false);
-                          cerrarSesion();
-                        }}
-                        className={`rounded-2xl border px-3 py-2 text-sm font-medium transition ${theme.btnSecondary}`}
-                        type="button"
-                      >
-                        Cerrar sesión
-                      </button>
-                    )}
+      {/* ✅ Header responsive */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
+        <div className="min-w-0 pr-12 sm:pr-0">
+          <p className={`text-xs ${theme.subtleText}`}>Cuenta</p>
+          <p className="mt-1 text-base font-semibold truncate">
+            {user?.displayName || "Invitado"}
+          </p>
+          {user?.email && (
+            <p className={`text-xs ${theme.subtleText} truncate break-all`}>
+              {user.email}
+            </p>
+          )}
+        </div>
 
-                    <button
-                      onClick={() => setDrawerOpen(false)}
-                      className={`rounded-2xl border px-3 py-2 text-sm font-medium transition ${theme.btnSecondary}`}
-                      type="button"
-                      aria-label="Cerrar"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                </div>
-
-                <div
-                  className={`rounded-2xl sm:rounded-3xl border p-4 sm:p-5 ${theme.cardAlt}`}
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-semibold">Discord</p>
-                      <p className={`mt-1 text-sm ${theme.bodyText}`}>
-                        {discordConnected ? "✅ Conectado" : "⚠️ No conectado"}
-                      </p>
-                      <p className={`mt-1 text-xs ${theme.subtleText}`}>
-                        Destino: {destinationText}
-                      </p>
-                    </div>
-
-                    <span
-                      className={[
-                        "text-xs rounded-full px-3 py-1 font-medium border",
-                        theme.chip,
-                      ].join(" ")}
-                    >
-                      {discordConnected ? "On" : "Off"}
-                    </span>
-                  </div>
-
-                  <div className="mt-4 flex gap-2">
-                    {!user ? (
-                      <button
-                        onClick={() => {
-                          setDrawerOpen(false);
-                          loginConGoogle();
-                        }}
-                        className={`flex-1 rounded-2xl px-4 py-3 font-medium transition ${theme.btnPrimary}`}
-                        type="button"
-                        disabled={authHydrating}
-                      >
-                        {authHydrating ? "Cargando..." : "Iniciar sesión"}
-                      </button>
-                    ) : (
-                      <button
-                        onClick={openDiscordSetup}
-                        className={`flex-1 rounded-2xl px-4 py-3 font-medium transition ${theme.btnPrimary}`}
-                        type="button"
-                        disabled={gateState === "loading"}
-                      >
-                        {!discordConnected ? "Conectar Discord" : "Cambiar canal"}
-                      </button>
-                    )}
-                  </div>
-
-                  {discordConnected && !selectedChannel && (
-                    <p className={`mt-3 text-xs ${theme.subtleText}`}>
-                      Falta elegir canal para poder enviar links.
-                    </p>
-                  )}
-                </div>
-
-                <div
-                  className={`rounded-2xl sm:rounded-3xl border p-4 sm:p-5 ${theme.cardAlt}`}
-                >
-                  <p className="text-sm font-semibold">Ayuda</p>
-                  <button
-                    onClick={openHowModal}
-                    className={`mt-3 w-full rounded-2xl border px-4 py-3 font-medium transition ${theme.btnSecondary}`}
-                    type="button"
-                  >
-                    Cómo funciona
-                  </button>
-                </div>
-
-                {/* ✅ Tema abajo de Ayuda: toggle (ON=oscuro / OFF=claro) */}
-                <div
-                  className={`rounded-2xl sm:rounded-3xl border p-4 sm:p-5 ${theme.cardAlt}`}
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-semibold">Tema</p>
-                      <p className={`mt-1 text-xs ${theme.subtleText}`}>
-                        {isLight ? "Claro" : "Oscuro"}
-                      </p>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => setIsLight((v) => !v)}
-                      className={[
-                        "relative inline-flex h-8 w-14 items-center rounded-full border transition",
-                        !isLight ? theme.toggleOnTrack : theme.toggleOffTrack,
-                      ].join(" ")}
-                      aria-label="Cambiar tema"
-                      aria-pressed={!isLight}
-                    >
-                      <span
-                        className={[
-                          "inline-block h-6 w-6 transform rounded-full transition",
-                          !isLight ? "translate-x-7" : "translate-x-1",
-                          !isLight ? theme.toggleOnKnob : theme.toggleOffKnob,
-                        ].join(" ")}
-                      />
-                    </button>
-                  </div>
-                </div>
-
-                <div className="mt-auto">
-                  <p className={`mt-3 text-xs ${theme.footerText}`}>
-                    Tip: usá un canal tipo{" "}
-                    <span className="font-medium">#para-reaccionar</span>.
-                  </p>
-                </div>
-              </aside>
-            </div>
+        {/* ✅ Acciones arriba a la derecha en desktop */}
+        <div className="hidden sm:flex items-center gap-2">
+          {user && (
+            <button
+              onClick={() => {
+                setDrawerOpen(false);
+                cerrarSesion();
+              }}
+              className={`rounded-2xl border px-3 py-2 text-sm font-medium transition ${theme.btnSecondary}`}
+              type="button"
+            >
+              Cerrar sesión
+            </button>
           )}
 
+          <button
+            onClick={() => setDrawerOpen(false)}
+            className={[
+              "h-10 w-10 rounded-2xl border",
+              "flex items-center justify-center",
+              "text-lg font-semibold leading-none",
+              theme.btnSecondary,
+            ].join(" ")}
+            type="button"
+            aria-label="Cerrar"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* ✅ Cerrar sesión en móvil (full width) */}
+        {user && (
+          <button
+            onClick={() => {
+              setDrawerOpen(false);
+              cerrarSesion();
+            }}
+            className={[
+              "sm:hidden",
+              "w-full rounded-2xl border px-3 py-2",
+              "text-sm font-medium transition",
+              theme.btnSecondary,
+            ].join(" ")}
+            type="button"
+          >
+            Cerrar sesión
+          </button>
+        )}
+      </div>
+
+      <div
+        className={`mt-4 rounded-2xl sm:rounded-3xl border p-4 sm:p-5 ${theme.cardAlt}`}
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-sm font-semibold">Discord</p>
+            <p className={`mt-1 text-sm ${theme.bodyText}`}>
+              {discordConnected ? "✅ Conectado" : "⚠️ No conectado"}
+            </p>
+            <p className={`mt-1 text-xs ${theme.subtleText} break-words`}>
+              Destino: {destinationText}
+            </p>
+          </div>
+
+          <span
+            className={[
+              "shrink-0 text-xs rounded-full px-3 py-1 font-medium border",
+              theme.chip,
+            ].join(" ")}
+          >
+            {discordConnected ? "On" : "Off"}
+          </span>
+        </div>
+
+        <div className="mt-4 flex flex-col sm:flex-row gap-2">
+          {!user ? (
+            <button
+              onClick={() => {
+                setDrawerOpen(false);
+                loginConGoogle();
+              }}
+              className={`w-full sm:flex-1 rounded-2xl px-4 py-3 font-medium transition ${theme.btnPrimary}`}
+              type="button"
+              disabled={authHydrating}
+            >
+              {authHydrating ? "Cargando..." : "Iniciar sesión"}
+            </button>
+          ) : (
+            <button
+              onClick={openDiscordSetup}
+              className={`w-full sm:flex-1 rounded-2xl px-4 py-3 font-medium transition ${theme.btnPrimary}`}
+              type="button"
+              disabled={gateState === "loading"}
+            >
+              {!discordConnected ? "Conectar Discord" : "Cambiar canal"}
+            </button>
+          )}
+        </div>
+
+        {discordConnected && !selectedChannel && (
+          <p className={`mt-3 text-xs ${theme.subtleText}`}>
+            Falta elegir canal para poder enviar links.
+          </p>
+        )}
+      </div>
+
+      <div
+        className={`mt-5 rounded-2xl sm:rounded-3xl border p-4 sm:p-5 ${theme.cardAlt}`}
+      >
+        <p className="text-sm font-semibold">Ayuda</p>
+        <button
+          onClick={openHowModal}
+          className={`mt-3 w-full rounded-2xl border px-4 py-3 font-medium transition ${theme.btnSecondary}`}
+          type="button"
+        >
+          Cómo funciona
+        </button>
+      </div>
+
+      <div
+        className={`mt-5 rounded-2xl sm:rounded-3xl border p-4 sm:p-5 ${theme.cardAlt}`}
+      >
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-semibold">Tema</p>
+            <p className={`mt-1 text-xs ${theme.subtleText}`}>
+              {isLight ? "Claro" : "Oscuro"}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setIsLight((v) => !v)}
+            className={[
+              "relative inline-flex h-8 w-14 items-center rounded-full border transition",
+              !isLight ? theme.toggleOnTrack : theme.toggleOffTrack,
+            ].join(" ")}
+            aria-label="Cambiar tema"
+            aria-pressed={!isLight}
+          >
+            <span
+              className={[
+                "inline-block h-6 w-6 transform rounded-full transition",
+                !isLight ? "translate-x-7" : "translate-x-1",
+                !isLight ? theme.toggleOnKnob : theme.toggleOffKnob,
+              ].join(" ")}
+            />
+          </button>
+        </div>
+      </div>
+
+      <div className="mt-6">
+        <p className={`text-xs ${theme.footerText}`}>
+          Tip: usá un canal tipo{" "}
+          <span className="font-medium">#para-reaccionar</span>.
+        </p>
+      </div>
+    </aside>
+  </div>
+)}
 
           <div className="px-4 py-8 sm:px-0 sm:py-0">
             {/* ✅ Modal "Cómo funciona" */}
