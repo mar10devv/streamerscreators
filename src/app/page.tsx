@@ -42,6 +42,7 @@ type DiscordCallbackData = {
   refreshToken?: string;
   expiresIn: number;
   servers: DiscordServer[];
+  guildId?: string | null; // ✅ NUEVO: servidor elegido al agregar el bot
 };
 
 type YTItem = {
@@ -188,13 +189,12 @@ function ShortsBlock({
   theme: Theme;
   onSend?: (url: string) => Promise<void>;
 }) {
-  const topics = useMemo(() => interests.slice(0, 3), [interests]); // 3 temas para que entre lindo
+  const topics = useMemo(() => interests.slice(0, 3), [interests]);
 
-  const [loading, setLoading] = useState(false); // carga inicial
+  const [loading, setLoading] = useState(false);
   const [byTopic, setByTopic] = useState<Record<string, YTItem[]>>({});
   const [active, setActive] = useState<YTItem | null>(null);
 
-  // loading por topic (para el botón refrescar)
   const [refreshing, setRefreshing] = useState<Record<string, boolean>>({});
 
   const fetchTopic = useCallback(async (t: string, signal?: AbortSignal) => {
@@ -208,7 +208,6 @@ function ShortsBlock({
     return (j.items || []) as YTItem[];
   }, []);
 
-  // carga inicial de los 3 topics
   useEffect(() => {
     if (topics.length === 0) return;
 
@@ -267,12 +266,10 @@ function ShortsBlock({
   return (
     <div
       className={[
-        // ✅ mobile compacto, desktop igual
         "rounded-2xl sm:rounded-3xl border p-4 sm:p-6",
         theme.cardAlt,
       ].join(" ")}
     >
-      {/* ✅ Modal player */}
       {active && (
         <div className="fixed inset-0 z-[80]">
           <button
@@ -471,7 +468,6 @@ export default function Home() {
   const [url, setUrl] = useState("");
   const [status, setStatus] = useState<string | null>(null);
 
-  // ✅ Tema: state + persistencia
   const [isLight, setIsLight] = useState(true);
 
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -493,13 +489,11 @@ export default function Home() {
   const [selectedServerName, setSelectedServerName] = useState<string>("");
   const [selectedChannelName, setSelectedChannelName] = useState<string>("");
 
-  // ✅ Recomendación automática (TOGGLE + expand/collapse)
   const [autoRecEnabled, setAutoRecEnabled] = useState(false);
   const [autoRecExpanded, setAutoRecExpanded] = useState(false);
   const [interests, setInterests] = useState<string[]>([]);
   const [savingAutoRec, setSavingAutoRec] = useState(false);
 
-  // ✅ Esto controla SI se muestra el bloque de shorts
   const [autoRecSaved, setAutoRecSaved] = useState(false);
 
   const channelsCacheRef = useRef<Map<string, DiscordChannel[]>>(new Map());
@@ -517,7 +511,6 @@ export default function Home() {
   const sendLabel = "Enviar";
   const sendDisabled = !canSendLink;
 
-  // ✅✅✅ TEMA: leer de localStorage al montar
   useEffect(() => {
     try {
       const saved = localStorage.getItem(THEME_STORAGE_KEY) as ThemeMode | null;
@@ -528,7 +521,6 @@ export default function Home() {
     }
   }, []);
 
-  // ✅✅✅ TEMA: guardar cambios
   useEffect(() => {
     try {
       const mode: ThemeMode = isLight ? "light" : "dark";
@@ -538,7 +530,6 @@ export default function Home() {
     }
   }, [isLight]);
 
-  // ✅✅✅ TEMA: reflejar en <html>
   useEffect(() => {
     const root = document.documentElement;
     if (!root) return;
@@ -603,6 +594,7 @@ export default function Home() {
           });
           setDiscordServers(data.discordServers || []);
 
+          // ✅ Si ya está guardado server/canal, no muestres setup
           if (data.selectedServer && data.selectedChannel) {
             setSelectedServer(data.selectedServer.id);
             setSelectedChannel(data.selectedChannel.id);
@@ -611,8 +603,20 @@ export default function Home() {
             setSelectedChannelName(data.selectedChannel.name || "");
 
             setShowServerSelector(false);
+
+            // ✅ opcional: cache de canales para ese server (así el nombre de canal se resuelve si hiciera falta)
+            // y evita que quede vacío si querés cambiar canal luego
+            void handleServerChange(data.selectedServer.id);
           } else {
+            // ✅ conectado pero falta canal: mostrar setup
             setShowServerSelector(true);
+
+            // ✅ si hay server guardado sin canal (por cambios previos), también cargamos canales
+            if (data.selectedServer?.id) {
+              setSelectedServer(data.selectedServer.id);
+              setSelectedServerName(data.selectedServer.name || "");
+              void handleServerChange(data.selectedServer.id);
+            }
           }
         }
       } catch (error) {
@@ -624,6 +628,7 @@ export default function Home() {
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   // Detectar si Discord se conectó exitosamente (nueva conexión)
@@ -638,12 +643,28 @@ export default function Home() {
         const data = JSON.parse(
           decodeURIComponent(discordDataParam)
         ) as DiscordCallbackData;
+
         setDiscordData(data);
         setDiscordServers(data.servers || []);
         setDiscordConnected(true);
 
-        setShowServerSelector(true);
-        setStatus("✅ Discord conectado! Ahora elegí el servidor y canal.");
+        // ✅ Si Discord devolvió guildId, fijamos ese server automáticamente
+        if (data.guildId) {
+          const gid = data.guildId;
+          setSelectedServer(gid);
+
+          const s = (data.servers || []).find((x) => x.id === gid);
+          setSelectedServerName(s?.name || "");
+
+          // ✅ cargar canales automáticamente -> el user elige SOLO canal
+          void handleServerChange(gid);
+          setShowServerSelector(true);
+          setStatus("✅ Discord conectado! Elegí el canal donde publicar.");
+        } else {
+          // fallback viejo
+          setShowServerSelector(true);
+          setStatus("✅ Discord conectado! Ahora elegí el servidor y canal.");
+        }
 
         void saveToFirestore(data);
         window.history.replaceState({}, "", "/");
@@ -677,11 +698,14 @@ export default function Home() {
             discordTokens: {
               accessToken: data.accessToken,
               refreshToken: data.refreshToken,
-              expiresAt: new Date(
-                Date.now() + data.expiresIn * 1000
-              ).toISOString(),
+              expiresAt: new Date(Date.now() + data.expiresIn * 1000).toISOString(),
             },
             discordServers: data.servers,
+
+            // ✅ guardamos el server elegido si vino del OAuth
+            ...(data.guildId
+              ? { selectedServer: { id: data.guildId, name: "" } }
+              : {}),
           },
           { merge: true }
         );
@@ -747,7 +771,7 @@ export default function Home() {
 
   const handleSaveChannelSelection = useCallback(async () => {
     if (!selectedServer || !selectedChannel || !user) {
-      setStatus("Seleccioná un servidor y canal primero");
+      setStatus("Seleccioná un canal primero");
       return;
     }
 
@@ -762,10 +786,7 @@ export default function Home() {
         doc(db, "users", user.uid),
         {
           selectedServer: { id: selectedServer, name: server?.name || "" },
-          selectedChannel: {
-            id: selectedChannel,
-            name: channel?.name || "",
-          },
+          selectedChannel: { id: selectedChannel, name: channel?.name || "" },
           updatedAt: new Date().toISOString(),
         },
         { merge: true }
@@ -917,7 +938,7 @@ export default function Home() {
     }
 
     if (!selectedChannel) {
-      setStatus("Primero configurá el servidor y canal de Discord.");
+      setStatus("Primero configurá el canal de Discord.");
       return;
     }
 
@@ -927,10 +948,7 @@ export default function Home() {
       const response = await fetch("/api/discord/send-message", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          channelId: selectedChannel,
-          message: v,
-        }),
+        body: JSON.stringify({ channelId: selectedChannel, message: v }),
       });
 
       const data = await response.json();
@@ -946,7 +964,6 @@ export default function Home() {
     }
   }, [isLogged, selectedChannel, url]);
 
-  // ✅✅ Envío desde el modal de Shorts (mismo bot, mismo endpoint)
   const sendFromShorts = useCallback(
     async (link: string) => {
       setStatus(null);
@@ -962,7 +979,7 @@ export default function Home() {
       }
 
       if (!selectedChannel) {
-        setStatus("Primero configurá el servidor y canal de Discord.");
+        setStatus("Primero configurá el canal de Discord.");
         return;
       }
 
@@ -972,10 +989,7 @@ export default function Home() {
         const response = await fetch("/api/discord/send-message", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            channelId: selectedChannel,
-            message: link,
-          }),
+          body: JSON.stringify({ channelId: selectedChannel, message: link }),
         });
 
         const data = await response.json();
@@ -1013,7 +1027,10 @@ export default function Home() {
     }
     setShowServerSelector(true);
     setDrawerOpen(false);
-  }, [discordConnected, handleConnectDiscord, user]);
+
+    // ✅ si ya hay server seleccionado, cargá canales directo
+    if (selectedServer) void handleServerChange(selectedServer);
+  }, [discordConnected, handleConnectDiscord, user, selectedServer, handleServerChange]);
 
   const pasteIsReady = clipboardState === "valid" && !!clipboardText;
   const pasteBtnClass = pasteIsReady ? theme.pasteReady : theme.btnSecondary;
@@ -1035,12 +1052,13 @@ export default function Home() {
     : "ready";
 
   const gateMessage =
-    gateState === "login" ? "Debe iniciar sesión primero" : "Conecte su servidor de discord";
+    gateState === "login"
+      ? "Debe iniciar sesión primero"
+      : "Conecte su servidor de discord";
   const isLocked = gateState !== "ready";
 
   return (
     <main className={`min-h-screen ${theme.pageBg}`}>
-      {/* glows */}
       <div className="pointer-events-none fixed inset-0 opacity-80">
         <div
           className={`absolute -top-40 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full blur-3xl ${theme.glow1}`}
@@ -1050,22 +1068,15 @@ export default function Home() {
         />
       </div>
 
-      {/* ✅ Mobile-first layout:
-          - en mobile: full width, padding chico
-          - en sm+: vuelve el “marco premium” centrado
-      */}
       <div className="relative mx-auto w-full max-w-none px-4 py-8 sm:max-w-6xl sm:px-6 sm:py-14">
         <div
           className={[
             "relative overflow-hidden border shadow-2xl backdrop-blur-xl",
-            // mobile: sin marco (no encajona)
             "rounded-none p-0 sm:rounded-[40px] sm:p-12",
             theme.shellBg,
           ].join(" ")}
         >
-          {/* ✅ en mobile metemos padding interno propio */}
           <div className="px-4 py-8 sm:px-0 sm:py-0">
-            {/* ✅ Modal "Cómo funciona" */}
             {howModalOpen && (
               <div className="fixed inset-0 z-[60]">
                 <button
@@ -1142,7 +1153,7 @@ export default function Home() {
                         <div>
                           <p className="font-medium">Conectás Discord</p>
                           <p className={`${theme.subtleText} text-xs mt-0.5`}>
-                            Elegís servidor y canal donde se enviarán los links.
+                            Elegís canal donde se enviarán los links.
                           </p>
                         </div>
                       </div>
@@ -1220,7 +1231,6 @@ export default function Home() {
               </div>
             )}
 
-            {/* ✅ Drawer + overlay */}
             {drawerOpen && (
               <div className="absolute inset-0 z-50">
                 <button
@@ -1320,7 +1330,7 @@ export default function Home() {
 
                     {discordConnected && !selectedChannel && (
                       <p className={`mt-3 text-xs ${theme.subtleText}`}>
-                        Falta elegir servidor/canal para poder enviar links.
+                        Falta elegir canal para poder enviar links.
                       </p>
                     )}
                   </div>
@@ -1363,7 +1373,6 @@ export default function Home() {
                 drawerOpen ? "blur-[2px] opacity-70" : "blur-0 opacity-100",
               ].join(" ")}
             >
-              {/* HEADER */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between gap-3">
                   <p className={`text-sm ${theme.subtleText}`}>StreamersCreators</p>
@@ -1378,7 +1387,6 @@ export default function Home() {
                   </button>
                 </div>
 
-                {/* ✅ Título más “mobile friendly” */}
                 <h1 className="text-4xl sm:text-6xl font-semibold tracking-tight leading-[1.05]">
                   Convertí vídeos virales en contenido{" "}
                   <span className={theme.titleAccent}>listo para reaccionar</span>
@@ -1410,7 +1418,6 @@ export default function Home() {
                 )}
               </div>
 
-              {/* BODY */}
               <div className="mt-8 sm:mt-10 space-y-5 sm:space-y-6">
                 {discordConnected && showServerSelector && (
                   <div className={`rounded-2xl sm:rounded-3xl border p-4 sm:p-6 ${theme.cardAlt}`}>
@@ -1421,28 +1428,32 @@ export default function Home() {
                     >
                       Configuración de Discord
                     </p>
+
                     <div className="space-y-4">
-                      <div>
-                        <label
-                          className={`block text-sm mb-2 ${
-                            isLight ? "text-[#2b0a5a]/70" : "text-white/70"
-                          }`}
-                        >
-                          Servidor
-                        </label>
-                        <select
-                          value={selectedServer}
-                          onChange={(e) => void handleServerChange(e.target.value)}
-                          className={`w-full rounded-2xl border px-4 py-3 outline-none transition ${theme.input}`}
-                        >
-                          <option value="">Seleccioná un servidor...</option>
-                          {discordServers.map((server) => (
-                            <option key={server.id} value={server.id}>
-                              {server.name}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
+                      {/* ✅ Si ya hay selectedServer (por guildId), NO mostramos selector de servidor */}
+                      {!selectedServer && (
+                        <div>
+                          <label
+                            className={`block text-sm mb-2 ${
+                              isLight ? "text-[#2b0a5a]/70" : "text-white/70"
+                            }`}
+                          >
+                            Servidor
+                          </label>
+                          <select
+                            value={selectedServer}
+                            onChange={(e) => void handleServerChange(e.target.value)}
+                            className={`w-full rounded-2xl border px-4 py-3 outline-none transition ${theme.input}`}
+                          >
+                            <option value="">Seleccioná un servidor...</option>
+                            {discordServers.map((server) => (
+                              <option key={server.id} value={server.id}>
+                                {server.name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
 
                       {selectedServer && (
                         <div>
@@ -1494,6 +1505,9 @@ export default function Home() {
                     isLocked ? "opacity-70 grayscale" : "opacity-100",
                   ].join(" ")}
                 >
+                  {/* ... (tu card principal queda igual) */}
+                  {/* Para mantener el mensaje corto no la vuelvo a reescribir acá */}
+                  {/* ✅ IMPORTANTE: pegá tu card principal tal cual la tenías, no cambia */}
                   <div className={isLocked ? "pointer-events-none select-none" : ""}>
                     <div className="mt-1">
                       <div className="flex items-center justify-between gap-3 mb-2">
@@ -1594,7 +1608,7 @@ export default function Home() {
                   )}
                 </div>
 
-                {/* ✅ Bloque Recomendación automática */}
+                {/* ✅ Bloque Recomendación automática (igual al tuyo) */}
                 <div
                   className={[
                     "border",
@@ -1604,6 +1618,7 @@ export default function Home() {
                     isLocked ? "opacity-70 grayscale" : "opacity-100",
                   ].join(" ")}
                 >
+                  {/* (tu bloque autoRec va igual, no cambia) */}
                   <div className={isLocked ? "pointer-events-none select-none" : ""}>
                     <div className="flex items-center justify-between gap-3">
                       <div>
@@ -1620,9 +1635,8 @@ export default function Home() {
                           const next = !autoRecEnabled;
                           setAutoRecEnabled(next);
 
-                          if (next) {
-                            setAutoRecExpanded(true);
-                          } else {
+                          if (next) setAutoRecExpanded(true);
+                          else {
                             setAutoRecExpanded(false);
                             setInterests([]);
                             setAutoRecSaved(false);
@@ -1752,7 +1766,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* ✅ Footer: mobile-first (sin encajonar) */}
         <footer
           className={[
             "mt-8 sm:mt-10 border",
