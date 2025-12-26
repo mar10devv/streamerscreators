@@ -265,11 +265,16 @@ function ShortsBlock({
   if (topics.length === 0) return null;
 
   return (
-    <div className={`rounded-3xl border p-6 ${theme.cardAlt}`}>
-      {/* ✅ Modal player (más chico + sin Abrir en YouTube + botón Enviar) */}
+    <div
+      className={[
+        // ✅ mobile compacto, desktop igual
+        "rounded-2xl sm:rounded-3xl border p-4 sm:p-6",
+        theme.cardAlt,
+      ].join(" ")}
+    >
+      {/* ✅ Modal player */}
       {active && (
         <div className="fixed inset-0 z-[80]">
-          {/* overlay (clic afuera cierra) */}
           <button
             type="button"
             aria-label="Cerrar reproductor"
@@ -277,20 +282,17 @@ function ShortsBlock({
             className={`absolute inset-0 ${theme.overlay}`}
           />
 
-          {/* contenedor centrado */}
           <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-6">
-            {/* ✅ UN SOLO PANEL */}
             <div
               role="dialog"
               aria-modal="true"
               className={[
                 "w-[92vw] max-w-sm",
-                "rounded-[30px] border overflow-hidden",
+                "rounded-[26px] sm:rounded-[30px] border overflow-hidden",
                 "flex flex-col",
                 theme.modalPanel,
               ].join(" ")}
             >
-              {/* ✅ Header fijo: título + X */}
               <div className="flex items-start justify-between gap-3 p-4">
                 <div className="min-w-0">
                   <p className="text-sm font-semibold line-clamp-2">
@@ -314,7 +316,6 @@ function ShortsBlock({
                 </button>
               </div>
 
-              {/* ✅ Video: ocupa TODO el espacio central */}
               <div className="px-4 pb-4">
                 <div className="w-full overflow-hidden rounded-2xl border">
                   <div className="aspect-[9/16] w-full">
@@ -329,13 +330,13 @@ function ShortsBlock({
                 </div>
               </div>
 
-              {/* ✅ Footer fijo: botón Enviar abajo */}
               <div className="p-4 pt-0">
                 <button
                   type="button"
                   onClick={async () => {
                     const link =
-                      active.url || `https://www.youtube.com/watch?v=${active.id}`;
+                      active.url ||
+                      `https://www.youtube.com/watch?v=${active.id}`;
                     if (onSend) await onSend(link);
                     setActive(null);
                   }}
@@ -363,7 +364,7 @@ function ShortsBlock({
         Basado en tus intereses guardados.
       </p>
 
-      <div className="mt-6 space-y-10">
+      <div className="mt-5 sm:mt-6 space-y-8 sm:space-y-10">
         {topics.map((t) => {
           const items = byTopic[t] || [];
           const show = items.slice(0, 8);
@@ -374,7 +375,6 @@ function ShortsBlock({
               <div className="flex items-center justify-between gap-3">
                 <p className="text-base font-semibold">{t}</p>
 
-                {/* ✅ Solo refrescar */}
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
@@ -392,15 +392,13 @@ function ShortsBlock({
                 </div>
               </div>
 
-              {/* ✅ MINIATURAS CHICAS (scroll horizontal + snap) */}
               <div className="mt-4 flex gap-3 overflow-x-auto pb-2 pr-1 snap-x snap-mandatory">
-                {/* Skeletons mientras carga inicial */}
                 {loading &&
                   show.length === 0 &&
                   Array.from({ length: 8 }).map((_, idx) => (
                     <div
                       key={`sk-${t}-${idx}`}
-                      className={`w-[140px] sm:w-[150px] shrink-0 snap-start rounded-3xl border p-2 ${theme.card}`}
+                      className={`w-[140px] sm:w-[150px] shrink-0 snap-start rounded-2xl sm:rounded-3xl border p-2 ${theme.card}`}
                     >
                       <div
                         className={`aspect-[9/16] w-full rounded-2xl border ${theme.cardAlt} animate-pulse bg-black/5`}
@@ -410,15 +408,16 @@ function ShortsBlock({
                     </div>
                   ))}
 
-                {/* Cards reales */}
                 {show.map((v) => (
                   <button
                     key={v.id}
                     type="button"
                     onClick={() => setActive(v)}
-                    className={`w-[140px] sm:w-[150px] shrink-0 snap-start text-left rounded-3xl border p-2 transition hover:opacity-95 ${theme.card}`}
+                    className={`w-[140px] sm:w-[150px] shrink-0 snap-start text-left rounded-2xl sm:rounded-3xl border p-2 transition hover:opacity-95 ${theme.card}`}
                   >
-                    <div className={`overflow-hidden rounded-2xl border ${theme.cardAlt}`}>
+                    <div
+                      className={`overflow-hidden rounded-2xl border ${theme.cardAlt}`}
+                    >
                       <div className="relative aspect-[9/16] w-full">
                         {v.thumbnail ? (
                           // eslint-disable-next-line @next/next/no-img-element
@@ -440,8 +439,12 @@ function ShortsBlock({
                       </div>
                     </div>
 
-                    <p className="mt-2 text-xs font-semibold line-clamp-2">{v.title}</p>
-                    <p className={`mt-1 text-[11px] ${theme.subtleText} line-clamp-1`}>
+                    <p className="mt-2 text-xs font-semibold line-clamp-2">
+                      {v.title}
+                    </p>
+                    <p
+                      className={`mt-1 text-[11px] ${theme.subtleText} line-clamp-1`}
+                    >
                       {v.channelTitle}
                     </p>
                   </button>
@@ -449,7 +452,8 @@ function ShortsBlock({
 
                 {!loading && items.length === 0 && (
                   <p className={`text-xs ${theme.subtleText}`}>
-                    No encontré Shorts para “{t}”. Probá refrescar o cambiar el interés.
+                    No encontré Shorts para “{t}”. Probá refrescar o cambiar el
+                    interés.
                   </p>
                 )}
               </div>
@@ -534,7 +538,7 @@ export default function Home() {
     }
   }, [isLight]);
 
-  // ✅✅✅ TEMA: reflejar en <html> (opcional pero recomendado)
+  // ✅✅✅ TEMA: reflejar en <html>
   useEffect(() => {
     const root = document.documentElement;
     if (!root) return;
@@ -1036,6 +1040,7 @@ export default function Home() {
 
   return (
     <main className={`min-h-screen ${theme.pageBg}`}>
+      {/* glows */}
       <div className="pointer-events-none fixed inset-0 opacity-80">
         <div
           className={`absolute -top-40 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full blur-3xl ${theme.glow1}`}
@@ -1045,696 +1050,714 @@ export default function Home() {
         />
       </div>
 
-      <div className="relative mx-auto max-w-6xl px-6 py-14">
+      {/* ✅ Mobile-first layout:
+          - en mobile: full width, padding chico
+          - en sm+: vuelve el “marco premium” centrado
+      */}
+      <div className="relative mx-auto w-full max-w-none px-4 py-8 sm:max-w-6xl sm:px-6 sm:py-14">
         <div
           className={[
-            "relative overflow-hidden rounded-[40px] border shadow-2xl backdrop-blur-xl p-8 sm:p-12",
+            "relative overflow-hidden border shadow-2xl backdrop-blur-xl",
+            // mobile: sin marco (no encajona)
+            "rounded-none p-0 sm:rounded-[40px] sm:p-12",
             theme.shellBg,
           ].join(" ")}
         >
-          {/* ✅ Modal "Cómo funciona" */}
-          {howModalOpen && (
-            <div className="fixed inset-0 z-[60]">
-              <button
-                type="button"
-                aria-label="Cerrar modal"
-                onClick={() => setHowModalOpen(false)}
-                className={`absolute inset-0 ${theme.overlay}`}
-              />
-              <div className="absolute inset-0 flex items-center justify-center p-6">
-                <div
-                  role="dialog"
-                  aria-modal="true"
-                  aria-label="Cómo funciona"
-                  className={[
-                    "w-[92vw] max-w-lg rounded-[34px] border backdrop-blur-xl",
-                    "p-6 sm:p-7",
-                    theme.modalPanel,
-                  ].join(" ")}
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p className="text-sm font-semibold">Cómo funciona</p>
-                      <p className={`mt-1 text-xs ${theme.subtleText}`}>
-                        Todo en 3 pasos. Rápido y simple.
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setHowModalOpen(false)}
-                      className={[
-                        "rounded-2xl border px-3 py-2 text-sm font-medium transition",
-                        theme.btnSecondary,
-                      ].join(" ")}
-                      aria-label="Cerrar"
-                    >
-                      ✕
-                    </button>
-                  </div>
-
+          {/* ✅ en mobile metemos padding interno propio */}
+          <div className="px-4 py-8 sm:px-0 sm:py-0">
+            {/* ✅ Modal "Cómo funciona" */}
+            {howModalOpen && (
+              <div className="fixed inset-0 z-[60]">
+                <button
+                  type="button"
+                  aria-label="Cerrar modal"
+                  onClick={() => setHowModalOpen(false)}
+                  className={`absolute inset-0 ${theme.overlay}`}
+                />
+                <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-6">
                   <div
-                    className={`mt-5 space-y-3 text-sm ${
-                      isLight ? "text-[#2b0a5a]/75" : "text-white/70"
-                    }`}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="Cómo funciona"
+                    className={[
+                      "w-[92vw] max-w-lg border backdrop-blur-xl",
+                      "rounded-[26px] sm:rounded-[34px]",
+                      "p-5 sm:p-7",
+                      theme.modalPanel,
+                    ].join(" ")}
                   >
-                    <div className="flex gap-3">
-                      <div
-                        className={`mt-0.5 h-7 w-7 rounded-full flex items-center justify-center ${
-                          isLight
-                            ? "bg-[#5b21b6]/10 text-[#2b0a5a]/80"
-                            : "bg-white/10 text-white/75"
-                        }`}
-                      >
-                        1
-                      </div>
+                    <div className="flex items-start justify-between gap-4">
                       <div>
-                        <p className="font-medium">Iniciás sesión</p>
-                        <p className={`${theme.subtleText} text-xs mt-0.5`}>
-                          Guardamos tu configuración para que no la pierdas.
+                        <p className="text-sm font-semibold">Cómo funciona</p>
+                        <p className={`mt-1 text-xs ${theme.subtleText}`}>
+                          Todo en 3 pasos. Rápido y simple.
                         </p>
                       </div>
-                    </div>
-
-                    <div className="flex gap-3">
-                      <div
-                        className={`mt-0.5 h-7 w-7 rounded-full flex items-center justify-center ${
-                          isLight
-                            ? "bg-[#5b21b6]/10 text-[#2b0a5a]/80"
-                            : "bg-white/10 text-white/75"
-                        }`}
-                      >
-                        2
-                      </div>
-                      <div>
-                        <p className="font-medium">Conectás Discord</p>
-                        <p className={`${theme.subtleText} text-xs mt-0.5`}>
-                          Elegís servidor y canal donde se enviarán los links.
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-3">
-                      <div
-                        className={`mt-0.5 h-7 w-7 rounded-full flex items-center justify-center ${
-                          isLight
-                            ? "bg-[#5b21b6]/10 text-[#2b0a5a]/80"
-                            : "bg-white/10 text-white/75"
-                        }`}
-                      >
-                        3
-                      </div>
-                      <div>
-                        <p className="font-medium">Pegás un link y enviás</p>
-                        <p className={`${theme.subtleText} text-xs mt-0.5`}>
-                          El bot lo manda al canal para que reacciones después.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className={`mt-6 rounded-2xl border p-4 ${theme.tipBox}`}>
-                    <p
-                      className={`text-xs ${
-                        isLight ? "text-[#2b0a5a]/70" : "text-white/60"
-                      }`}
-                    >
-                      Tip: armate un canal tipo{" "}
-                      <span
-                        className={
-                          isLight
-                            ? "text-[#5b21b6] font-medium"
-                            : "text-white/85 font-medium"
-                        }
-                      >
-                        #para-reaccionar
-                      </span>{" "}
-                      y guardá todo ahí.
-                    </p>
-                  </div>
-
-                  <div className="mt-5 flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setHowModalOpen(false)}
-                      className={[
-                        "flex-1 rounded-2xl border px-4 py-3 text-sm font-medium transition",
-                        theme.btnSecondary,
-                      ].join(" ")}
-                    >
-                      Entendido
-                    </button>
-
-                    {!user && (
                       <button
                         type="button"
-                        onClick={() => {
-                          setHowModalOpen(false);
-                          loginConGoogle();
-                        }}
-                        disabled={loading}
+                        onClick={() => setHowModalOpen(false)}
                         className={[
-                          "flex-1 rounded-2xl px-4 py-3 text-sm font-semibold transition disabled:opacity-50",
-                          theme.btnPrimary,
+                          "rounded-2xl border px-3 py-2 text-sm font-medium transition",
+                          theme.btnSecondary,
+                        ].join(" ")}
+                        aria-label="Cerrar"
+                      >
+                        ✕
+                      </button>
+                    </div>
+
+                    <div
+                      className={`mt-5 space-y-3 text-sm ${
+                        isLight ? "text-[#2b0a5a]/75" : "text-white/70"
+                      }`}
+                    >
+                      <div className="flex gap-3">
+                        <div
+                          className={`mt-0.5 h-7 w-7 rounded-full flex items-center justify-center ${
+                            isLight
+                              ? "bg-[#5b21b6]/10 text-[#2b0a5a]/80"
+                              : "bg-white/10 text-white/75"
+                          }`}
+                        >
+                          1
+                        </div>
+                        <div>
+                          <p className="font-medium">Iniciás sesión</p>
+                          <p className={`${theme.subtleText} text-xs mt-0.5`}>
+                            Guardamos tu configuración para que no la pierdas.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-3">
+                        <div
+                          className={`mt-0.5 h-7 w-7 rounded-full flex items-center justify-center ${
+                            isLight
+                              ? "bg-[#5b21b6]/10 text-[#2b0a5a]/80"
+                              : "bg-white/10 text-white/75"
+                          }`}
+                        >
+                          2
+                        </div>
+                        <div>
+                          <p className="font-medium">Conectás Discord</p>
+                          <p className={`${theme.subtleText} text-xs mt-0.5`}>
+                            Elegís servidor y canal donde se enviarán los links.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-3">
+                        <div
+                          className={`mt-0.5 h-7 w-7 rounded-full flex items-center justify-center ${
+                            isLight
+                              ? "bg-[#5b21b6]/10 text-[#2b0a5a]/80"
+                              : "bg-white/10 text-white/75"
+                          }`}
+                        >
+                          3
+                        </div>
+                        <div>
+                          <p className="font-medium">Pegás un link y enviás</p>
+                          <p className={`${theme.subtleText} text-xs mt-0.5`}>
+                            El bot lo manda al canal para que reacciones después.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className={`mt-6 rounded-2xl border p-4 ${theme.tipBox}`}>
+                      <p
+                        className={`text-xs ${
+                          isLight ? "text-[#2b0a5a]/70" : "text-white/60"
+                        }`}
+                      >
+                        Tip: armate un canal tipo{" "}
+                        <span
+                          className={
+                            isLight
+                              ? "text-[#5b21b6] font-medium"
+                              : "text-white/85 font-medium"
+                          }
+                        >
+                          #para-reaccionar
+                        </span>{" "}
+                        y guardá todo ahí.
+                      </p>
+                    </div>
+
+                    <div className="mt-5 flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setHowModalOpen(false)}
+                        className={[
+                          "flex-1 rounded-2xl border px-4 py-3 text-sm font-medium transition",
+                          theme.btnSecondary,
                         ].join(" ")}
                       >
-                        {loading ? "Cargando..." : "Iniciar sesión"}
+                        Entendido
                       </button>
-                    )}
+
+                      {!user && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setHowModalOpen(false);
+                            loginConGoogle();
+                          }}
+                          disabled={loading}
+                          className={[
+                            "flex-1 rounded-2xl px-4 py-3 text-sm font-semibold transition disabled:opacity-50",
+                            theme.btnPrimary,
+                          ].join(" ")}
+                        >
+                          {loading ? "Cargando..." : "Iniciar sesión"}
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* ✅ Drawer + overlay */}
-          {drawerOpen && (
-            <div className="absolute inset-0 z-50">
-              <button
-                aria-label="Cerrar menú"
-                onClick={() => setDrawerOpen(false)}
-                className={`absolute inset-0 ${theme.overlay}`}
-                type="button"
-              />
-              <aside
-                className={[
-                  "absolute right-0 top-0 h-full w-[92vw] max-w-md",
-                  "border-l backdrop-blur-xl",
-                  "p-6 flex flex-col gap-5",
-                  "rounded-l-[34px]",
-                  theme.drawerPanel,
-                ].join(" ")}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className={`text-xs ${theme.subtleText}`}>Cuenta</p>
-                    <p className="mt-1 text-base font-semibold">
-                      {user?.displayName || "Invitado"}
-                    </p>
-                    {user?.email && (
-                      <p className={`text-xs ${theme.subtleText}`}>{user.email}</p>
+            {/* ✅ Drawer + overlay */}
+            {drawerOpen && (
+              <div className="absolute inset-0 z-50">
+                <button
+                  aria-label="Cerrar menú"
+                  onClick={() => setDrawerOpen(false)}
+                  className={`absolute inset-0 ${theme.overlay}`}
+                  type="button"
+                />
+                <aside
+                  className={[
+                    "absolute right-0 top-0 h-full w-[92vw] max-w-md",
+                    "border-l backdrop-blur-xl",
+                    "p-6 flex flex-col gap-5",
+                    "rounded-l-[34px]",
+                    theme.drawerPanel,
+                  ].join(" ")}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className={`text-xs ${theme.subtleText}`}>Cuenta</p>
+                      <p className="mt-1 text-base font-semibold">
+                        {user?.displayName || "Invitado"}
+                      </p>
+                      {user?.email && (
+                        <p className={`text-xs ${theme.subtleText}`}>{user.email}</p>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setIsLight((v) => !v)}
+                        className={`rounded-2xl border px-3 py-2 text-sm font-medium transition ${theme.btnSecondary}`}
+                        type="button"
+                      >
+                        {isLight ? "Modo oscuro" : "Modo claro"}
+                      </button>
+
+                      <button
+                        onClick={() => setDrawerOpen(false)}
+                        className={`rounded-2xl border px-3 py-2 text-sm font-medium transition ${theme.btnSecondary}`}
+                        type="button"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className={`rounded-2xl sm:rounded-3xl border p-4 sm:p-5 ${theme.cardAlt}`}>
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-semibold">Discord</p>
+                        <p className={`mt-1 text-sm ${theme.bodyText}`}>
+                          {discordConnected ? "✅ Conectado" : "⚠️ No conectado"}
+                        </p>
+                        <p className={`mt-1 text-xs ${theme.subtleText}`}>
+                          Destino: {destinationText}
+                        </p>
+                      </div>
+
+                      <span
+                        className={[
+                          "text-xs rounded-full px-3 py-1 font-medium border",
+                          theme.chip,
+                        ].join(" ")}
+                      >
+                        {discordConnected ? "On" : "Off"}
+                      </span>
+                    </div>
+
+                    <div className="mt-4 flex gap-2">
+                      {!user ? (
+                        <button
+                          onClick={() => {
+                            setDrawerOpen(false);
+                            loginConGoogle();
+                          }}
+                          className={`flex-1 rounded-2xl px-4 py-3 font-medium transition ${theme.btnPrimary}`}
+                          type="button"
+                          disabled={loading}
+                        >
+                          {loading ? "Cargando..." : "Iniciar sesión"}
+                        </button>
+                      ) : (
+                        <button
+                          onClick={openDiscordSetup}
+                          className={`flex-1 rounded-2xl px-4 py-3 font-medium transition ${theme.btnPrimary}`}
+                          type="button"
+                        >
+                          {!discordConnected
+                            ? "Conectar canal"
+                            : selectedServer && selectedChannel
+                            ? "Cambiar canal"
+                            : "Elegir canal"}
+                        </button>
+                      )}
+                    </div>
+
+                    {discordConnected && !selectedChannel && (
+                      <p className={`mt-3 text-xs ${theme.subtleText}`}>
+                        Falta elegir servidor/canal para poder enviar links.
+                      </p>
                     )}
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className={`rounded-2xl sm:rounded-3xl border p-4 sm:p-5 ${theme.cardAlt}`}>
+                    <p className="text-sm font-semibold">Ayuda</p>
                     <button
-                      onClick={() => setIsLight((v) => !v)}
-                      className={`rounded-2xl border px-3 py-2 text-sm font-medium transition ${theme.btnSecondary}`}
+                      onClick={openHowModal}
+                      className={`mt-3 w-full rounded-2xl border px-4 py-3 font-medium transition ${theme.btnSecondary}`}
                       type="button"
                     >
-                      {isLight ? "Modo oscuro" : "Modo claro"}
-                    </button>
-
-                    <button
-                      onClick={() => setDrawerOpen(false)}
-                      className={`rounded-2xl border px-3 py-2 text-sm font-medium transition ${theme.btnSecondary}`}
-                      type="button"
-                    >
-                      ✕
+                      Cómo funciona
                     </button>
                   </div>
-                </div>
 
-                <div className={`rounded-3xl border p-5 ${theme.cardAlt}`}>
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-semibold">Discord</p>
-                      <p className={`mt-1 text-sm ${theme.bodyText}`}>
-                        {discordConnected ? "✅ Conectado" : "⚠️ No conectado"}
-                      </p>
-                      <p className={`mt-1 text-xs ${theme.subtleText}`}>
-                        Destino: {destinationText}
-                      </p>
-                    </div>
-
-                    <span
-                      className={[
-                        "text-xs rounded-full px-3 py-1 font-medium border",
-                        theme.chip,
-                      ].join(" ")}
-                    >
-                      {discordConnected ? "On" : "Off"}
-                    </span>
-                  </div>
-
-                  <div className="mt-4 flex gap-2">
-                    {!user ? (
+                  <div className="mt-auto">
+                    {user && (
                       <button
                         onClick={() => {
                           setDrawerOpen(false);
-                          loginConGoogle();
+                          cerrarSesion();
                         }}
-                        className={`flex-1 rounded-2xl px-4 py-3 font-medium transition ${theme.btnPrimary}`}
-                        type="button"
-                        disabled={loading}
-                      >
-                        {loading ? "Cargando..." : "Iniciar sesión"}
-                      </button>
-                    ) : (
-                      <button
-                        onClick={openDiscordSetup}
-                        className={`flex-1 rounded-2xl px-4 py-3 font-medium transition ${theme.btnPrimary}`}
+                        className={`w-full rounded-2xl border px-4 py-3 font-medium transition ${theme.btnSecondary}`}
                         type="button"
                       >
-                        {!discordConnected
-                          ? "Conectar canal"
-                          : selectedServer && selectedChannel
-                          ? "Cambiar canal"
-                          : "Elegir canal"}
+                        Cerrar sesión
                       </button>
                     )}
-                  </div>
-
-                  {discordConnected && !selectedChannel && (
-                    <p className={`mt-3 text-xs ${theme.subtleText}`}>
-                      Falta elegir servidor/canal para poder enviar links.
+                    <p className={`mt-3 text-xs ${theme.footerText}`}>
+                      Tip: usá un canal tipo <span className="font-medium">#para-reaccionar</span>.
                     </p>
-                  )}
-                </div>
+                  </div>
+                </aside>
+              </div>
+            )}
 
-                <div className={`rounded-3xl border p-5 ${theme.cardAlt}`}>
-                  <p className="text-sm font-semibold">Ayuda</p>
+            <div
+              className={[
+                "transition duration-200",
+                drawerOpen ? "blur-[2px] opacity-70" : "blur-0 opacity-100",
+              ].join(" ")}
+            >
+              {/* HEADER */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between gap-3">
+                  <p className={`text-sm ${theme.subtleText}`}>StreamersCreators</p>
+
                   <button
-                    onClick={openHowModal}
-                    className={`mt-3 w-full rounded-2xl border px-4 py-3 font-medium transition ${theme.btnSecondary}`}
+                    onClick={() => setDrawerOpen(true)}
+                    className={`rounded-2xl border px-4 py-2 text-sm font-medium transition ${theme.btnSecondary}`}
                     type="button"
+                    aria-label="Abrir menú"
                   >
-                    Cómo funciona
+                    ☰
                   </button>
                 </div>
 
-                <div className="mt-auto">
-                  {user && (
+                {/* ✅ Título más “mobile friendly” */}
+                <h1 className="text-4xl sm:text-6xl font-semibold tracking-tight leading-[1.05]">
+                  Convertí vídeos virales en contenido{" "}
+                  <span className={theme.titleAccent}>listo para reaccionar</span>
+                </h1>
+
+                <p className={`max-w-2xl text-base sm:text-lg ${theme.bodyText}`}>
+                  Pegá el link de TikTok, Reels o Shorts
+                  <br />
+                  Un bot se encargará de enviarte el vídeo para que reacciones!
+                </p>
+
+                {!user && (
+                  <div className="pt-2">
                     <button
-                      onClick={() => {
-                        setDrawerOpen(false);
-                        cerrarSesion();
-                      }}
-                      className={`w-full rounded-2xl border px-4 py-3 font-medium transition ${theme.btnSecondary}`}
                       type="button"
+                      onClick={() => loginConGoogle()}
+                      disabled={loading}
+                      className={[
+                        "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition",
+                        "disabled:opacity-50 disabled:cursor-not-allowed",
+                        theme.googleBtn,
+                      ].join(" ")}
+                      aria-label="Iniciar sesión con Google"
                     >
-                      Cerrar sesión
+                      <GoogleIcon className="h-4 w-4" />
+                      <span>{loading ? "Cargando..." : "Iniciá sesión con Google"}</span>
                     </button>
-                  )}
-                  <p className={`mt-3 text-xs ${theme.footerText}`}>
-                    Tip: usá un canal tipo <span className="font-medium">#para-reaccionar</span>.
-                  </p>
-                </div>
-              </aside>
-            </div>
-          )}
-
-          <div
-            className={[
-              "transition duration-200",
-              drawerOpen ? "blur-[2px] opacity-70" : "blur-0 opacity-100",
-            ].join(" ")}
-          >
-            <div className="space-y-4">
-              <div className="flex items-center justify-between gap-3">
-                <p className={`text-sm ${theme.subtleText}`}>StreamersCreators</p>
-
-                <button
-                  onClick={() => setDrawerOpen(true)}
-                  className={`rounded-2xl border px-4 py-2 text-sm font-medium transition ${theme.btnSecondary}`}
-                  type="button"
-                  aria-label="Abrir menú"
-                >
-                  ☰
-                </button>
+                  </div>
+                )}
               </div>
 
-              <h1 className="text-4xl sm:text-6xl font-semibold tracking-tight leading-[1.05]">
-                Convertí vídeos virales en contenido{" "}
-                <span className={theme.titleAccent}>listo para reaccionar</span>
-              </h1>
-
-              <p className={`max-w-2xl text-base sm:text-lg ${theme.bodyText}`}>
-                Pegá el link de TikTok, Reels o Shorts
-                <br />
-                Un bot se encargará de enviarte el vídeo para que reacciones!
-              </p>
-
-              {!user && (
-                <div className="pt-2">
-                  <button
-                    type="button"
-                    onClick={() => loginConGoogle()}
-                    disabled={loading}
-                    className={[
-                      "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition",
-                      "disabled:opacity-50 disabled:cursor-not-allowed",
-                      theme.googleBtn,
-                    ].join(" ")}
-                    aria-label="Iniciar sesión con Google"
-                  >
-                    <GoogleIcon className="h-4 w-4" />
-                    <span>{loading ? "Cargando..." : "Iniciá sesión con Google"}</span>
-                  </button>
-                </div>
-              )}
-            </div>
-
-            <div className="mt-10 space-y-6">
-              {discordConnected && showServerSelector && (
-                <div className={`rounded-3xl border p-6 ${theme.cardAlt}`}>
-                  <p
-                    className={`text-sm font-medium mb-4 ${
-                      isLight ? "text-[#2b0a5a]" : "text-white/80"
-                    }`}
-                  >
-                    Configuración de Discord
-                  </p>
-                  <div className="space-y-4">
-                    <div>
-                      <label
-                        className={`block text-sm mb-2 ${
-                          isLight ? "text-[#2b0a5a]/70" : "text-white/70"
-                        }`}
-                      >
-                        Servidor
-                      </label>
-                      <select
-                        value={selectedServer}
-                        onChange={(e) => void handleServerChange(e.target.value)}
-                        className={`w-full rounded-2xl border px-4 py-3 outline-none transition ${theme.input}`}
-                      >
-                        <option value="">Seleccioná un servidor...</option>
-                        {discordServers.map((server) => (
-                          <option key={server.id} value={server.id}>
-                            {server.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    {selectedServer && (
+              {/* BODY */}
+              <div className="mt-8 sm:mt-10 space-y-5 sm:space-y-6">
+                {discordConnected && showServerSelector && (
+                  <div className={`rounded-2xl sm:rounded-3xl border p-4 sm:p-6 ${theme.cardAlt}`}>
+                    <p
+                      className={`text-sm font-medium mb-4 ${
+                        isLight ? "text-[#2b0a5a]" : "text-white/80"
+                      }`}
+                    >
+                      Configuración de Discord
+                    </p>
+                    <div className="space-y-4">
                       <div>
                         <label
                           className={`block text-sm mb-2 ${
                             isLight ? "text-[#2b0a5a]/70" : "text-white/70"
                           }`}
                         >
-                          Canal
+                          Servidor
                         </label>
                         <select
-                          value={selectedChannel}
-                          onChange={(e) => handleChannelChange(e.target.value)}
-                          disabled={loadingChannels}
-                          className={`w-full rounded-2xl border px-4 py-3 outline-none transition ${theme.input} disabled:opacity-50`}
+                          value={selectedServer}
+                          onChange={(e) => void handleServerChange(e.target.value)}
+                          className={`w-full rounded-2xl border px-4 py-3 outline-none transition ${theme.input}`}
                         >
-                          <option value="">
-                            {loadingChannels ? "Cargando canales..." : "Seleccioná un canal..."}
-                          </option>
-                          {channels.map((channel) => (
-                            <option key={channel.id} value={channel.id}>
-                              # {channel.name}
+                          <option value="">Seleccioná un servidor...</option>
+                          {discordServers.map((server) => (
+                            <option key={server.id} value={server.id}>
+                              {server.name}
                             </option>
                           ))}
                         </select>
                       </div>
-                    )}
 
-                    {selectedServer && selectedChannel && (
-                      <button
-                        onClick={() => void handleSaveChannelSelection()}
-                        className={`w-full rounded-2xl px-6 py-3 font-medium transition ${theme.btnPrimary}`}
-                        type="button"
-                      >
-                        Guardar configuración
-                      </button>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* ✅ Card principal (link + enviar). Arreglado: intereses NO quedan en el medio */}
-              <div
-                className={[
-                  "relative rounded-3xl border p-6",
-                  isLocked ? theme.cardAlt : theme.card,
-                  isLocked ? "opacity-70 grayscale" : "opacity-100",
-                ].join(" ")}
-              >
-                <div className={isLocked ? "pointer-events-none select-none" : ""}>
-                  <div className="mt-1">
-                    <div className="flex items-center justify-between gap-3 mb-2">
-                      <label
-                        className={`block text-sm ${
-                          isLight ? "text-[#2b0a5a]/70" : "text-white/70"
-                        }`}
-                      >
-                        Link del video
-                      </label>
-                      {clipboardState === "valid" && !!clipboardText && (
-                        <span
-                          className={[
-                            "text-xs rounded-full px-3 py-1 font-medium",
-                            theme.pasteReady,
-                          ].join(" ")}
-                        >
-                          Listo ✅
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="flex flex-col sm:flex-row gap-3">
-                      <input
-                        value={url}
-                        onChange={(e) => setUrl(e.target.value)}
-                        onFocus={() => void checkClipboardOnce()}
-                        placeholder="Pegá acá el link…"
-                        disabled={isLocked}
-                        className={`flex-1 rounded-2xl border px-4 py-3 outline-none transition ${theme.input} disabled:opacity-50`}
-                      />
-                      <button
-                        type="button"
-                        onMouseEnter={() => void checkClipboardOnce()}
-                        onClick={() => void handlePaste()}
-                        disabled={isLocked}
-                        className={`rounded-2xl border px-5 py-3 font-medium transition ${pasteBtnClass} disabled:opacity-50 disabled:cursor-not-allowed`}
-                      >
-                        {pasteBtnText}
-                      </button>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => void handleSend()}
-                      disabled={isLocked || sendDisabled}
-                      className={[
-                        "mt-4 w-full rounded-2xl px-6 py-3 font-medium transition disabled:opacity-40 disabled:cursor-not-allowed",
-                        theme.btnPrimary,
-                      ].join(" ")}
-                    >
-                      {sendLabel}
-                    </button>
-
-                    {status && (
-                      <p className={`mt-3 text-sm ${isLight ? "text-[#2b0a5a]/60" : "text-white/60"}`}>
-                        {status}
-                      </p>
-                    )}
-                    {domain && (
-                      <p className={`mt-2 text-xs ${theme.subtleText}`}>Detectado: {domain}</p>
-                    )}
-                  </div>
-                </div>
-
-                {isLocked && (
-                  <div className="absolute inset-0 rounded-3xl overflow-hidden flex items-center justify-center">
-                    <div className={["absolute inset-0", isLight ? "bg-black/15" : "bg-black/45"].join(" ")} />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (gateState === "login") {
-                          loginConGoogle();
-                        } else {
-                          if (!discordConnected) handleConnectDiscord();
-                          else setShowServerSelector(true);
-                        }
-                      }}
-                      className={[
-                        "relative z-10",
-                        "rounded-full border px-7 py-4",
-                        "text-sm sm:text-base font-extrabold",
-                        "shadow-[0_18px_55px_rgba(0,0,0,0.22)]",
-                        "inline-flex items-center gap-3",
-                        "bg-white",
-                        "border-[#5b21b6]/20",
-                        "text-[#5b21b6]",
-                        "hover:bg-[#5b21b6]/5",
-                        "transition",
-                        "focus:outline-none focus:ring-2 focus:ring-[#5b21b6]/30",
-                      ].join(" ")}
-                      aria-label={gateMessage}
-                    >
-                      <span className="text-lg">{gateState === "login" ? "🔒" : "⚠️"}</span>
-                      <span>{gateMessage}</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* ✅ Bloque Recomendación automática (envuelve tus intereses + Shorts) */}
-              <div
-                className={[
-                  "rounded-3xl border p-6",
-                  theme.cardAlt,
-                  isLocked ? "opacity-70 grayscale" : "opacity-100",
-                ].join(" ")}
-              >
-                <div className={isLocked ? "pointer-events-none select-none" : ""}>
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <div className="text-sm font-semibold">Recomendación automática</div>
-                      <div className={`text-xs ${theme.subtleText}`}>
-                        Elegí intereses y guardamos tu perfil para recomendarte Shorts.
-                      </div>
-                    </div>
-
-                    {/* Toggle */}
-                    <button
-                      type="button"
-                      disabled={isLocked}
-                      onClick={() => {
-                        const next = !autoRecEnabled;
-                        setAutoRecEnabled(next);
-
-                        if (next) {
-                          setAutoRecExpanded(true);
-                        } else {
-                          setAutoRecExpanded(false);
-                          setInterests([]);
-                          setAutoRecSaved(false);
-                        }
-                      }}
-                      className={[
-                        "relative inline-flex h-8 w-14 items-center rounded-full border transition",
-                        "disabled:opacity-50 disabled:cursor-not-allowed",
-                        autoRecEnabled ? theme.toggleOnTrack : theme.toggleOffTrack,
-                      ].join(" ")}
-                      aria-label="Activar o desactivar recomendación automática"
-                    >
-                      <span
-                        className={[
-                          "inline-block h-6 w-6 transform rounded-full transition",
-                          autoRecEnabled ? "translate-x-7" : "translate-x-1",
-                          autoRecEnabled ? theme.toggleOnKnob : theme.toggleOffKnob,
-                        ].join(" ")}
-                      />
-                    </button>
-                  </div>
-
-                  {/* Expandible */}
-                  {autoRecEnabled && autoRecExpanded && (
-                    <div className="mt-5">
-                      <div className="flex items-center justify-between gap-3">
-                        <p className="text-sm font-semibold">Tus intereses</p>
-                        <span className={`text-xs ${theme.subtleText}`}>{interests.length}/8</span>
-                      </div>
-
-                      {interests.length > 0 && (
-                        <div className="mt-3 flex flex-wrap gap-2">
-                          {interests.map((tag) => (
-                            <button
-                              key={tag}
-                              type="button"
-                              onClick={() => toggleInterest(tag)}
-                              className={[
-                                "rounded-full border px-3 py-1 text-xs font-medium transition",
-                                theme.chip,
-                              ].join(" ")}
-                              title="Quitar"
-                              disabled={isLocked}
-                            >
-                              {tag} ✕
-                            </button>
-                          ))}
+                      {selectedServer && (
+                        <div>
+                          <label
+                            className={`block text-sm mb-2 ${
+                              isLight ? "text-[#2b0a5a]/70" : "text-white/70"
+                            }`}
+                          >
+                            Canal
+                          </label>
+                          <select
+                            value={selectedChannel}
+                            onChange={(e) => handleChannelChange(e.target.value)}
+                            disabled={loadingChannels}
+                            className={`w-full rounded-2xl border px-4 py-3 outline-none transition ${theme.input} disabled:opacity-50`}
+                          >
+                            <option value="">
+                              {loadingChannels ? "Cargando canales..." : "Seleccioná un canal..."}
+                            </option>
+                            {channels.map((channel) => (
+                              <option key={channel.id} value={channel.id}>
+                                # {channel.name}
+                              </option>
+                            ))}
+                          </select>
                         </div>
                       )}
 
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        {INTERESES_SUGERIDOS.map((x) => {
-                          const selected = interests.some((t) => t.toLowerCase() === x.toLowerCase());
-                          const disabled = (!selected && interests.length >= 8) || isLocked;
+                      {selectedServer && selectedChannel && (
+                        <button
+                          onClick={() => void handleSaveChannelSelection()}
+                          className={`w-full rounded-2xl px-6 py-3 font-medium transition ${theme.btnPrimary}`}
+                          type="button"
+                        >
+                          Guardar configuración
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
 
-                          return (
-                            <button
-                              key={x}
-                              type="button"
-                              onClick={() => toggleInterest(x)}
-                              disabled={disabled}
-                              className={[
-                                "rounded-full border px-3 py-1 text-xs font-medium transition disabled:opacity-40 disabled:cursor-not-allowed",
-                                selected ? theme.chip : theme.btnSecondary,
-                              ].join(" ")}
-                            >
-                              {x}
-                            </button>
-                          );
-                        })}
+                {/* ✅ Card principal */}
+                <div
+                  className={[
+                    "relative border",
+                    "rounded-2xl sm:rounded-3xl",
+                    "p-4 sm:p-6",
+                    isLocked ? theme.cardAlt : theme.card,
+                    isLocked ? "opacity-70 grayscale" : "opacity-100",
+                  ].join(" ")}
+                >
+                  <div className={isLocked ? "pointer-events-none select-none" : ""}>
+                    <div className="mt-1">
+                      <div className="flex items-center justify-between gap-3 mb-2">
+                        <label
+                          className={`block text-sm ${
+                            isLight ? "text-[#2b0a5a]/70" : "text-white/70"
+                          }`}
+                        >
+                          Link del video
+                        </label>
+                        {clipboardState === "valid" && !!clipboardText && (
+                          <span
+                            className={[
+                              "text-xs rounded-full px-3 py-1 font-medium",
+                              theme.pasteReady,
+                            ].join(" ")}
+                          >
+                            Listo ✅
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex flex-col gap-3 sm:flex-row">
+                        <input
+                          value={url}
+                          onChange={(e) => setUrl(e.target.value)}
+                          onFocus={() => void checkClipboardOnce()}
+                          placeholder="Pegá acá el link…"
+                          disabled={isLocked}
+                          className={`flex-1 rounded-2xl border px-4 py-3 outline-none transition ${theme.input} disabled:opacity-50`}
+                        />
+                        <button
+                          type="button"
+                          onMouseEnter={() => void checkClipboardOnce()}
+                          onClick={() => void handlePaste()}
+                          disabled={isLocked}
+                          className={`rounded-2xl border px-5 py-3 font-medium transition ${pasteBtnClass} disabled:opacity-50 disabled:cursor-not-allowed`}
+                        >
+                          {pasteBtnText}
+                        </button>
                       </div>
 
                       <button
                         type="button"
-                        onClick={async () => {
-                          const ok = await handleSaveAutoRecommendation();
-                          if (ok) setAutoRecExpanded(false);
-                        }}
-                        disabled={isLocked || savingAutoRec || interests.length === 0}
+                        onClick={() => void handleSend()}
+                        disabled={isLocked || sendDisabled}
                         className={[
-                          "mt-5 w-full rounded-2xl px-6 py-3 font-medium transition disabled:opacity-40 disabled:cursor-not-allowed",
+                          "mt-4 w-full rounded-2xl px-6 py-3 font-medium transition disabled:opacity-40 disabled:cursor-not-allowed",
                           theme.btnPrimary,
                         ].join(" ")}
                       >
-                        {savingAutoRec ? "Guardando..." : "Guardar"}
+                        {sendLabel}
                       </button>
 
-                      <p className={`mt-2 text-xs ${theme.subtleText}`}>
-                        Esto se guarda en tu perfil para futuras recomendaciones.
-                      </p>
+                      {status && (
+                        <p className={`mt-3 text-sm ${isLight ? "text-[#2b0a5a]/60" : "text-white/60"}`}>
+                          {status}
+                        </p>
+                      )}
+                      {domain && (
+                        <p className={`mt-2 text-xs ${theme.subtleText}`}>Detectado: {domain}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {isLocked && (
+                    <div className="absolute inset-0 rounded-2xl sm:rounded-3xl overflow-hidden flex items-center justify-center">
+                      <div className={["absolute inset-0", isLight ? "bg-black/15" : "bg-black/45"].join(" ")} />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (!user) {
+                            loginConGoogle();
+                          } else {
+                            if (!discordConnected) handleConnectDiscord();
+                            else setShowServerSelector(true);
+                          }
+                        }}
+                        className={[
+                          "relative z-10",
+                          "rounded-full border px-6 py-4",
+                          "text-sm sm:text-base font-extrabold",
+                          "shadow-[0_18px_55px_rgba(0,0,0,0.22)]",
+                          "inline-flex items-center gap-3",
+                          "bg-white",
+                          "border-[#5b21b6]/20",
+                          "text-[#5b21b6]",
+                          "hover:bg-[#5b21b6]/5",
+                          "transition",
+                          "focus:outline-none focus:ring-2 focus:ring-[#5b21b6]/30",
+                        ].join(" ")}
+                        aria-label={gateMessage}
+                      >
+                        <span className="text-lg">{!user ? "🔒" : "⚠️"}</span>
+                        <span>{gateMessage}</span>
+                      </button>
                     </div>
                   )}
+                </div>
 
-                  {/* Minimizado */}
-                  {autoRecEnabled && !autoRecExpanded && (
-                    <div className="mt-5">
-                      <div className={`text-xs ${theme.subtleText}`}>
-                        {autoRecSaved
-                          ? `Activado ✅ · ${interests.length} intereses guardados`
-                          : "Activado ✅ · Guardá tus intereses para ver Shorts"}
+                {/* ✅ Bloque Recomendación automática */}
+                <div
+                  className={[
+                    "border",
+                    "rounded-2xl sm:rounded-3xl",
+                    "p-4 sm:p-6",
+                    theme.cardAlt,
+                    isLocked ? "opacity-70 grayscale" : "opacity-100",
+                  ].join(" ")}
+                >
+                  <div className={isLocked ? "pointer-events-none select-none" : ""}>
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <div className="text-sm font-semibold">Recomendación automática</div>
+                        <div className={`text-xs ${theme.subtleText}`}>
+                          Elegí intereses y guardamos tu perfil para recomendarte Shorts.
+                        </div>
                       </div>
 
                       <button
                         type="button"
                         disabled={isLocked}
-                        onClick={() => setAutoRecExpanded(true)}
+                        onClick={() => {
+                          const next = !autoRecEnabled;
+                          setAutoRecEnabled(next);
+
+                          if (next) {
+                            setAutoRecExpanded(true);
+                          } else {
+                            setAutoRecExpanded(false);
+                            setInterests([]);
+                            setAutoRecSaved(false);
+                          }
+                        }}
                         className={[
-                          "mt-3 w-full rounded-2xl border px-4 py-3 text-sm font-medium transition",
-                          theme.btnSecondary,
+                          "relative inline-flex h-8 w-14 items-center rounded-full border transition",
                           "disabled:opacity-50 disabled:cursor-not-allowed",
+                          autoRecEnabled ? theme.toggleOnTrack : theme.toggleOffTrack,
                         ].join(" ")}
+                        aria-label="Activar o desactivar recomendación automática"
                       >
-                        Editar intereses
+                        <span
+                          className={[
+                            "inline-block h-6 w-6 transform rounded-full transition",
+                            autoRecEnabled ? "translate-x-7" : "translate-x-1",
+                            autoRecEnabled ? theme.toggleOnKnob : theme.toggleOffKnob,
+                          ].join(" ")}
+                        />
                       </button>
                     </div>
-                  )}
 
-                  {/* ✅ Shorts dentro del bloque de recomendación */}
-                  {autoRecEnabled && autoRecSaved && interests.length > 0 && (
-                    <div className="mt-6">
-                      <ShortsBlock interests={interests} theme={theme} onSend={sendFromShorts} />
-                    </div>
-                  )}
+                    {autoRecEnabled && autoRecExpanded && (
+                      <div className="mt-5">
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="text-sm font-semibold">Tus intereses</p>
+                          <span className={`text-xs ${theme.subtleText}`}>{interests.length}/8</span>
+                        </div>
+
+                        {interests.length > 0 && (
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {interests.map((tag) => (
+                              <button
+                                key={tag}
+                                type="button"
+                                onClick={() => toggleInterest(tag)}
+                                className={[
+                                  "rounded-full border px-3 py-1 text-xs font-medium transition",
+                                  theme.chip,
+                                ].join(" ")}
+                                title="Quitar"
+                                disabled={isLocked}
+                              >
+                                {tag} ✕
+                              </button>
+                            ))}
+                          </div>
+                        )}
+
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          {INTERESES_SUGERIDOS.map((x) => {
+                            const selected = interests.some(
+                              (t) => t.toLowerCase() === x.toLowerCase()
+                            );
+                            const disabled = (!selected && interests.length >= 8) || isLocked;
+
+                            return (
+                              <button
+                                key={x}
+                                type="button"
+                                onClick={() => toggleInterest(x)}
+                                disabled={disabled}
+                                className={[
+                                  "rounded-full border px-3 py-1 text-xs font-medium transition disabled:opacity-40 disabled:cursor-not-allowed",
+                                  selected ? theme.chip : theme.btnSecondary,
+                                ].join(" ")}
+                              >
+                                {x}
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            const ok = await handleSaveAutoRecommendation();
+                            if (ok) setAutoRecExpanded(false);
+                          }}
+                          disabled={isLocked || savingAutoRec || interests.length === 0}
+                          className={[
+                            "mt-5 w-full rounded-2xl px-6 py-3 font-medium transition disabled:opacity-40 disabled:cursor-not-allowed",
+                            theme.btnPrimary,
+                          ].join(" ")}
+                        >
+                          {savingAutoRec ? "Guardando..." : "Guardar"}
+                        </button>
+
+                        <p className={`mt-2 text-xs ${theme.subtleText}`}>
+                          Esto se guarda en tu perfil para futuras recomendaciones.
+                        </p>
+                      </div>
+                    )}
+
+                    {autoRecEnabled && !autoRecExpanded && (
+                      <div className="mt-5">
+                        <div className={`text-xs ${theme.subtleText}`}>
+                          {autoRecSaved
+                            ? `Activado ✅ · ${interests.length} intereses guardados`
+                            : "Activado ✅ · Guardá tus intereses para ver Shorts"}
+                        </div>
+
+                        <button
+                          type="button"
+                          disabled={isLocked}
+                          onClick={() => setAutoRecExpanded(true)}
+                          className={[
+                            "mt-3 w-full rounded-2xl border px-4 py-3 text-sm font-medium transition",
+                            theme.btnSecondary,
+                            "disabled:opacity-50 disabled:cursor-not-allowed",
+                          ].join(" ")}
+                        >
+                          Editar intereses
+                        </button>
+                      </div>
+                    )}
+
+                    {autoRecEnabled && autoRecSaved && interests.length > 0 && (
+                      <div className="mt-6">
+                        <ShortsBlock interests={interests} theme={theme} onSend={sendFromShorts} />
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
+        {/* ✅ Footer: mobile-first (sin encajonar) */}
         <footer
           className={[
-            "mt-10 rounded-3xl border px-6 py-5",
+            "mt-8 sm:mt-10 border",
+            "rounded-2xl sm:rounded-3xl",
+            "px-4 py-5 sm:px-6",
             "flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between",
             theme.cardAlt,
           ].join(" ")}
