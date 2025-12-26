@@ -119,12 +119,9 @@ const THEMES = {
     shellBg: "bg-white/55 border-[#2b0a5a]/12",
     pasteReady: "bg-[#5b21b6] text-white hover:opacity-95",
     overlay: "bg-black/55 backdrop-blur-md",
-    drawerPanel:
-      "bg-white/88 border-[#5b21b6]/15 shadow-[0_30px_90px_rgba(0,0,0,0.25)]",
-    modalPanel:
-      "bg-white/92 border-[#5b21b6]/15 shadow-[0_30px_90px_rgba(0,0,0,0.25)]",
-    googleBtn:
-      "bg-white/70 border-[#2b0a5a]/18 text-[#2b0a5a] hover:bg-[#5b21b6]/7",
+    drawerPanel: "bg-white/88 border-[#5b21b6]/15 shadow-[0_30px_90px_rgba(0,0,0,0.25)]",
+    modalPanel: "bg-white/92 border-[#5b21b6]/15 shadow-[0_30px_90px_rgba(0,0,0,0.25)]",
+    googleBtn: "bg-white/70 border-[#2b0a5a]/18 text-[#2b0a5a] hover:bg-[#5b21b6]/7",
     toggleOnTrack: "bg-[#5b21b6]/15 border-[#2b0a5a]/20",
     toggleOffTrack: "bg-black/5 border-[#2b0a5a]/20",
     toggleOnKnob: "bg-[#5b21b6]",
@@ -149,10 +146,8 @@ const THEMES = {
     shellBg: "bg-white/5 border-white/12",
     pasteReady: "bg-white text-black hover:opacity-90",
     overlay: "bg-black/70 backdrop-blur-md",
-    drawerPanel:
-      "bg-black/80 border-white/15 shadow-[0_30px_90px_rgba(0,0,0,0.55)]",
-    modalPanel:
-      "bg-black/82 border-white/15 shadow-[0_30px_90px_rgba(0,0,0,0.55)]",
+    drawerPanel: "bg-black/80 border-white/15 shadow-[0_30px_90px_rgba(0,0,0,0.55)]",
+    modalPanel: "bg-black/82 border-white/15 shadow-[0_30px_90px_rgba(0,0,0,0.55)]",
     googleBtn: "bg-white text-black border-white/25 hover:opacity-90",
     toggleOnTrack: "bg-white/15 border-white/15",
     toggleOffTrack: "bg-black/30 border-white/15",
@@ -280,9 +275,7 @@ function ShortsBlock({
               <div className="flex items-start justify-between gap-3 p-4">
                 <div className="min-w-0">
                   <p className="text-sm font-semibold line-clamp-2">{active.title}</p>
-                  <p className={`mt-1 text-xs ${theme.subtleText} line-clamp-1`}>
-                    {active.channelTitle}
-                  </p>
+                  <p className={`mt-1 text-xs ${theme.subtleText} line-clamp-1`}>{active.channelTitle}</p>
                 </div>
 
                 <button
@@ -320,10 +313,7 @@ function ShortsBlock({
                     if (onSend) await onSend(link);
                     setActive(null);
                   }}
-                  className={[
-                    "w-full rounded-2xl px-4 py-3 text-sm font-semibold transition",
-                    theme.btnPrimary,
-                  ].join(" ")}
+                  className={["w-full rounded-2xl px-4 py-3 text-sm font-semibold transition", theme.btnPrimary].join(" ")}
                 >
                   Enviar
                 </button>
@@ -376,9 +366,7 @@ function ShortsBlock({
                       key={`sk-${t}-${idx}`}
                       className={`w-[140px] sm:w-[150px] shrink-0 snap-start rounded-2xl sm:rounded-3xl border p-2 ${theme.card}`}
                     >
-                      <div
-                        className={`aspect-[9/16] w-full rounded-2xl border ${theme.cardAlt} animate-pulse bg-black/5`}
-                      />
+                      <div className={`aspect-[9/16] w-full rounded-2xl border ${theme.cardAlt} animate-pulse bg-black/5`} />
                       <div className="mt-2 h-3 w-5/6 animate-pulse rounded bg-black/5" />
                       <div className="mt-2 h-3 w-2/3 animate-pulse rounded bg-black/5" />
                     </div>
@@ -414,9 +402,7 @@ function ShortsBlock({
                     </div>
 
                     <p className="mt-2 text-xs font-semibold line-clamp-2">{v.title}</p>
-                    <p className={`mt-1 text-[11px] ${theme.subtleText} line-clamp-1`}>
-                      {v.channelTitle}
-                    </p>
+                    <p className={`mt-1 text-[11px] ${theme.subtleText} line-clamp-1`}>{v.channelTitle}</p>
                   </button>
                 ))}
 
@@ -495,8 +481,10 @@ export default function Home() {
   const sendLabel = "Enviar";
   const sendDisabled = !canSendLink;
 
-  const hasUnsavedChannelChange =
-    discordConnected && !!selectedChannel && selectedChannel !== savedChannelId;
+  const hasUnsavedChannelChange = discordConnected && !!selectedChannel && selectedChannel !== savedChannelId;
+
+  // ✅ NUEVO: loading de auth (para no mostrar “Debe iniciar sesión primero” durante la hidratación)
+  const authHydrating = loading;
 
   // ✅✅✅ TEMA: leer al montar
   useEffect(() => {
@@ -816,15 +804,7 @@ export default function Home() {
     } finally {
       setSavingChannel(false);
     }
-  }, [
-    channels,
-    discordServers,
-    selectedChannel,
-    selectedServer,
-    selectedServerName,
-    user,
-    savedChannelId,
-  ]);
+  }, [channels, discordServers, selectedChannel, selectedServer, selectedServerName, user, savedChannelId]);
 
   const toggleInterest = useCallback((tag: string) => {
     setInterests((prev) => {
@@ -1080,14 +1060,19 @@ export default function Home() {
 
   const hasDiscordDestination = !!selectedChannel;
 
-  const gateState: "login" | "discord" | "ready" = !user
+  // ✅✅✅ GATE con estado loading
+  const gateState: "loading" | "login" | "discord" | "ready" = authHydrating
+    ? "loading"
+    : !user
     ? "login"
     : !discordConnected || !hasDiscordDestination
     ? "discord"
     : "ready";
 
   const gateMessage =
-    gateState === "login"
+    gateState === "loading"
+      ? "Cargando sesión..."
+      : gateState === "login"
       ? "Debe iniciar sesión primero"
       : !discordConnected
       ? "Conectá tu Discord"
@@ -1140,9 +1125,7 @@ export default function Home() {
                     <div className="flex items-start justify-between gap-4">
                       <div>
                         <p className="text-sm font-semibold">Cómo funciona</p>
-                        <p className={`mt-1 text-xs ${theme.subtleText}`}>
-                          Todo en 3 pasos. Rápido y simple.
-                        </p>
+                        <p className={`mt-1 text-xs ${theme.subtleText}`}>Todo en 3 pasos. Rápido y simple.</p>
                       </div>
                       <button
                         type="button"
@@ -1214,11 +1197,7 @@ export default function Home() {
                     <div className={`mt-6 rounded-2xl border p-4 ${theme.tipBox}`}>
                       <p className={`text-xs ${isLight ? "text-[#2b0a5a]/70" : "text-white/60"}`}>
                         Tip: armate un canal tipo{" "}
-                        <span
-                          className={
-                            isLight ? "text-[#5b21b6] font-medium" : "text-white/85 font-medium"
-                          }
-                        >
+                        <span className={isLight ? "text-[#5b21b6] font-medium" : "text-white/85 font-medium"}>
                           #para-reaccionar
                         </span>{" "}
                         y guardá todo ahí.
@@ -1237,7 +1216,7 @@ export default function Home() {
                         Entendido
                       </button>
 
-                      {!user && (
+                      {!user && !authHydrating && (
                         <button
                           type="button"
                           onClick={() => {
@@ -1250,7 +1229,7 @@ export default function Home() {
                             theme.btnPrimary,
                           ].join(" ")}
                         >
-                          {loading ? "Cargando..." : "Iniciar sesión"}
+                          Iniciar sesión
                         </button>
                       )}
                     </div>
@@ -1313,15 +1292,13 @@ export default function Home() {
                         <p className={`mt-1 text-xs ${theme.subtleText}`}>Destino: {destinationText}</p>
                       </div>
 
-                      <span
-                        className={["text-xs rounded-full px-3 py-1 font-medium border", theme.chip].join(" ")}
-                      >
+                      <span className={["text-xs rounded-full px-3 py-1 font-medium border", theme.chip].join(" ")}>
                         {discordConnected ? "On" : "Off"}
                       </span>
                     </div>
 
                     <div className="mt-4 flex gap-2">
-                      {!user ? (
+                      {!user && !authHydrating ? (
                         <button
                           onClick={() => {
                             setDrawerOpen(false);
@@ -1329,15 +1306,15 @@ export default function Home() {
                           }}
                           className={`flex-1 rounded-2xl px-4 py-3 font-medium transition ${theme.btnPrimary}`}
                           type="button"
-                          disabled={loading}
                         >
-                          {loading ? "Cargando..." : "Iniciar sesión"}
+                          Iniciar sesión
                         </button>
                       ) : (
                         <button
                           onClick={openDiscordSetup}
                           className={`flex-1 rounded-2xl px-4 py-3 font-medium transition ${theme.btnPrimary}`}
                           type="button"
+                          disabled={authHydrating}
                         >
                           {!discordConnected ? "Conectar Discord" : "Cambiar canal"}
                         </button>
@@ -1345,9 +1322,7 @@ export default function Home() {
                     </div>
 
                     {discordConnected && !selectedChannel && (
-                      <p className={`mt-3 text-xs ${theme.subtleText}`}>
-                        Falta elegir canal para poder enviar links.
-                      </p>
+                      <p className={`mt-3 text-xs ${theme.subtleText}`}>Falta elegir canal para poder enviar links.</p>
                     )}
                   </div>
 
@@ -1405,8 +1380,7 @@ export default function Home() {
                 </div>
 
                 <h1 className="text-4xl sm:text-6xl font-semibold tracking-tight leading-[1.05]">
-                  Convertí vídeos virales en contenido{" "}
-                  <span className={theme.titleAccent}>listo para reaccionar</span>
+                  Convertí vídeos virales en contenido <span className={theme.titleAccent}>listo para reaccionar</span>
                 </h1>
 
                 <p className={`max-w-2xl text-base sm:text-lg ${theme.bodyText}`}>
@@ -1415,28 +1389,48 @@ export default function Home() {
                   Un bot se encargará de enviarte el vídeo para que reacciones!
                 </p>
 
-                {!user && (
+                {/* ✅ botón solo si NO hay user y NO está hidratando */}
+                {!user && !authHydrating && (
                   <div className="pt-2">
                     <button
                       type="button"
                       onClick={() => loginConGoogle()}
-                      disabled={loading}
                       className={[
                         "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition",
-                        "disabled:opacity-50 disabled:cursor-not-allowed",
                         theme.googleBtn,
                       ].join(" ")}
                       aria-label="Iniciar sesión con Google"
                     >
                       <GoogleIcon className="h-4 w-4" />
-                      <span>{loading ? "Cargando..." : "Iniciá sesión con Google"}</span>
+                      <span>Iniciá sesión con Google</span>
                     </button>
+                  </div>
+                )}
+
+                {/* ✅ pill de cargando, para evitar el “flash” feo */}
+                {authHydrating && (
+                  <div className="pt-2">
+                    <div
+                      className={[
+                        "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold",
+                        theme.googleBtn,
+                        "opacity-70",
+                      ].join(" ")}
+                    >
+                      <span className="animate-pulse">Cargando sesión...</span>
+                    </div>
                   </div>
                 )}
               </div>
 
               {/* BODY */}
-              <div className="mt-8 sm:mt-10 space-y-5 sm:space-y-6">
+              <div
+                className={[
+                  "mt-8 sm:mt-10 space-y-5 sm:space-y-6",
+                  "transition-all duration-500 ease-out",
+                  authHydrating ? "opacity-70 translate-y-1" : "opacity-100 translate-y-0",
+                ].join(" ")}
+              >
                 {/* ✅✅✅ Selector de canal (pestaña) SIEMPRE visible si Discord está conectado */}
                 {discordConnected && (
                   <div ref={discordConfigRef} className={`rounded-2xl sm:rounded-3xl border ${theme.cardAlt}`}>
@@ -1448,47 +1442,18 @@ export default function Home() {
                       aria-expanded={discordConfigOpen}
                     >
                       <div className="text-left">
-                        <p
-                          className={`text-sm font-semibold ${
-                            isLight ? "text-[#2b0a5a]" : "text-white/90"
-                          }`}
-                        >
-                          Seleccioná tu canal de Discord
-                        </p>
-                        <p className={`mt-1 text-xs ${theme.subtleText}`}>
-                          {selectedServerName ? `Servidor: ${selectedServerName}` : "Servidor conectado"}
-                          {" · "}Destino actual:{" "}
-                          <span className="font-medium">
-                            {selectedChannelName ? `#${selectedChannelName}` : "—"}
-                          </span>
-                          {hasUnsavedChannelChange && (
-                            <span className="ml-2 font-semibold">· Cambios sin guardar</span>
-                          )}
+                        <p className={`text-sm font-semibold ${isLight ? "text-[#2b0a5a]" : "text-white/90"}`}>
+                          Selecciona canal de Discord
                         </p>
                       </div>
 
-                      <span
-                        className={[
-                          "shrink-0 text-xs rounded-full px-3 py-1 font-medium border",
-                          theme.chip,
-                        ].join(" ")}
-                      >
-                        {savedChannelId ? "Canal listo" : selectedChannel ? "Listo (no guardado)" : "Falta canal"}
-                      </span>
-
-                      <span className={`ml-2 shrink-0 text-sm ${theme.subtleText}`}>
-                        {discordConfigOpen ? "▴" : "▾"}
-                      </span>
+                      <span className={`ml-2 shrink-0 text-sm ${theme.subtleText}`}>{discordConfigOpen ? "▴" : "▾"}</span>
                     </button>
 
                     {discordConfigOpen && (
                       <div className="px-4 pb-4 sm:px-6 sm:pb-6">
                         <div className="pt-2 space-y-3">
-                          <label
-                            className={`block text-sm ${
-                              isLight ? "text-[#2b0a5a]/70" : "text-white/70"
-                            }`}
-                          >
+                          <label className={`block text-sm ${isLight ? "text-[#2b0a5a]/70" : "text-white/70"}`}>
                             Canal
                           </label>
 
@@ -1498,9 +1463,7 @@ export default function Home() {
                             disabled={loadingChannels}
                             className={`w-full rounded-2xl border px-4 py-3 outline-none transition ${theme.input} disabled:opacity-50`}
                           >
-                            <option value="">
-                              {loadingChannels ? "Cargando canales..." : "Seleccioná un canal..."}
-                            </option>
+                            <option value="">{loadingChannels ? "Cargando canales..." : "Seleccioná un canal..."}</option>
                             {channels.map((channel) => (
                               <option key={channel.id} value={channel.id}>
                                 # {channel.name}
@@ -1542,15 +1505,11 @@ export default function Home() {
                 {!discordConnected && user && (
                   <div className={`rounded-2xl sm:rounded-3xl border p-4 sm:p-6 ${theme.cardAlt}`}>
                     <p className="text-sm font-semibold">Conectá Discord</p>
-                    <p className={`mt-1 text-xs ${theme.subtleText}`}>
-                      Agregá el bot a tu servidor y después elegís el canal destino.
-                    </p>
+                    <p className={`mt-1 text-xs ${theme.subtleText}`}>Agregá el bot a tu servidor y después elegís el canal destino.</p>
                     <button
                       type="button"
                       onClick={handleConnectDiscord}
-                      className={["mt-4 w-full rounded-2xl px-6 py-3 font-medium transition", theme.btnPrimary].join(
-                        " "
-                      )}
+                      className={["mt-4 w-full rounded-2xl px-6 py-3 font-medium transition", theme.btnPrimary].join(" ")}
                     >
                       Conectar Discord
                     </button>
@@ -1625,6 +1584,7 @@ export default function Home() {
                       <button
                         type="button"
                         onClick={() => {
+                          if (authHydrating) return; // ✅ no hacer nada mientras hidrata
                           if (!user) {
                             loginConGoogle();
                           } else {
@@ -1647,10 +1607,11 @@ export default function Home() {
                           "hover:bg-[#5b21b6]/5",
                           "transition",
                           "focus:outline-none focus:ring-2 focus:ring-[#5b21b6]/30",
+                          authHydrating ? "opacity-80 cursor-not-allowed" : "",
                         ].join(" ")}
                         aria-label={gateMessage}
                       >
-                        <span className="text-lg">{!user ? "🔒" : "⚠️"}</span>
+                        <span className="text-lg">{gateState === "loading" ? "⏳" : !user ? "🔒" : "⚠️"}</span>
                         <span>{gateMessage}</span>
                       </button>
                     </div>
@@ -1722,7 +1683,10 @@ export default function Home() {
                                 key={tag}
                                 type="button"
                                 onClick={() => toggleInterest(tag)}
-                                className={["rounded-full border px-3 py-1 text-xs font-medium transition", theme.chip].join(" ")}
+                                className={[
+                                  "rounded-full border px-3 py-1 text-xs font-medium transition",
+                                  theme.chip,
+                                ].join(" ")}
                                 title="Quitar"
                                 disabled={isLocked}
                               >
@@ -1769,18 +1733,14 @@ export default function Home() {
                           {savingAutoRec ? "Guardando..." : "Guardar"}
                         </button>
 
-                        <p className={`mt-2 text-xs ${theme.subtleText}`}>
-                          Esto se guarda en tu perfil para futuras recomendaciones.
-                        </p>
+                        <p className={`mt-2 text-xs ${theme.subtleText}`}>Esto se guarda en tu perfil para futuras recomendaciones.</p>
                       </div>
                     )}
 
                     {autoRecEnabled && !autoRecExpanded && (
                       <div className="mt-5">
                         <div className={`text-xs ${theme.subtleText}`}>
-                          {autoRecSaved
-                            ? `Activado ✅ · ${interests.length} intereses guardados`
-                            : "Activado ✅ · Guardá tus intereses para ver Shorts"}
+                          {autoRecSaved ? `Activado ✅ · ${interests.length} intereses guardados` : "Activado ✅ · Guardá tus intereses para ver Shorts"}
                         </div>
 
                         <button
@@ -1839,6 +1799,7 @@ export default function Home() {
                 type="button"
                 onClick={openDiscordSetup}
                 className={["rounded-2xl border px-4 py-2 text-sm font-medium transition", theme.btnSecondary].join(" ")}
+                disabled={authHydrating}
               >
                 Discord
               </button>
@@ -1852,12 +1813,15 @@ export default function Home() {
               </button>
             </div>
 
-            <span
-              className={["inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs", theme.chip].join(" ")}
-            >
-              <span className="text-sm">{user ? "👤" : "🔒"}</span>
-              <span className="font-medium">{user ? "Sesión activa" : "Sin sesión"}</span>
-              {user && <span className={theme.subtleText}>· {selectedChannel ? "Canal listo" : "Falta canal"}</span>}
+            {/* ✅ quitamos “Canal listo” del footer y evitamos flash en loading */}
+            <span className={["inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs", theme.chip].join(" ")}>
+              <span className="text-sm">{authHydrating ? "⏳" : user ? "👤" : "🔒"}</span>
+              <span className="font-medium">
+                {authHydrating ? "Cargando sesión" : user ? "Sesión activa" : "Sin sesión"}
+              </span>
+              {user && !authHydrating && (
+                <span className={theme.subtleText}>· {selectedChannel ? "Canal configurado" : "Falta canal"}</span>
+              )}
             </span>
           </div>
         </footer>
