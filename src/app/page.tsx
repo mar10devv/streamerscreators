@@ -25,13 +25,7 @@ function getDomainLabel(raw: string) {
   }
 }
 
-type ClipboardState =
-  | "idle"
-  | "checking"
-  | "unsupported"
-  | "empty"
-  | "invalid"
-  | "valid";
+type ClipboardState = "idle" | "checking" | "unsupported" | "empty" | "invalid" | "valid";
 
 type DiscordServer = { id: string; name: string };
 type DiscordChannel = { id: string; name: string };
@@ -117,8 +111,7 @@ const THEMES = {
     input:
       "bg-white/70 border-[#2b0a5a]/15 text-[#2b0a5a] placeholder:text-[#2b0a5a]/35 focus:border-[#5b21b6]/40",
     btnPrimary: "bg-[#5b21b6] text-white hover:opacity-95",
-    btnSecondary:
-      "border-[#2b0a5a]/20 text-[#2b0a5a] hover:bg-[#5b21b6]/5",
+    btnSecondary: "border-[#2b0a5a]/20 text-[#2b0a5a] hover:bg-[#5b21b6]/5",
     tipBox: "border-[#2b0a5a]/10 bg-[#5b21b6]/5",
     footerText: "text-[#2b0a5a]/50",
     glow1: "bg-[#5b21b6]/15",
@@ -200,9 +193,7 @@ function ShortsBlock({
 
   const fetchTopic = useCallback(async (t: string, signal?: AbortSignal) => {
     const r = await fetch(
-      `/api/recommendations/youtube?topic=${encodeURIComponent(
-        t
-      )}&limit=16&r=${Date.now()}`,
+      `/api/recommendations/youtube?topic=${encodeURIComponent(t)}&limit=16&r=${Date.now()}`,
       { signal, cache: "no-store" }
     );
     const j = await r.json().catch(() => ({ items: [] }));
@@ -265,12 +256,7 @@ function ShortsBlock({
   if (topics.length === 0) return null;
 
   return (
-    <div
-      className={[
-        "rounded-2xl sm:rounded-3xl border p-4 sm:p-6",
-        theme.cardAlt,
-      ].join(" ")}
-    >
+    <div className={["rounded-2xl sm:rounded-3xl border p-4 sm:p-6", theme.cardAlt].join(" ")}>
       {active && (
         <div className="fixed inset-0 z-[80]">
           <button
@@ -293,9 +279,7 @@ function ShortsBlock({
             >
               <div className="flex items-start justify-between gap-3 p-4">
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold line-clamp-2">
-                    {active.title}
-                  </p>
+                  <p className="text-sm font-semibold line-clamp-2">{active.title}</p>
                   <p className={`mt-1 text-xs ${theme.subtleText} line-clamp-1`}>
                     {active.channelTitle}
                   </p>
@@ -332,9 +316,7 @@ function ShortsBlock({
                 <button
                   type="button"
                   onClick={async () => {
-                    const link =
-                      active.url ||
-                      `https://www.youtube.com/watch?v=${active.id}`;
+                    const link = active.url || `https://www.youtube.com/watch?v=${active.id}`;
                     if (onSend) await onSend(link);
                     setActive(null);
                   }}
@@ -353,14 +335,10 @@ function ShortsBlock({
 
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm font-semibold">Shorts para vos</p>
-        <span className={`text-xs ${theme.subtleText}`}>
-          {loading ? "Cargando..." : "Reciente"}
-        </span>
+        <span className={`text-xs ${theme.subtleText}`}>{loading ? "Cargando..." : "Reciente"}</span>
       </div>
 
-      <p className={`mt-2 text-xs ${theme.subtleText}`}>
-        Basado en tus intereses guardados.
-      </p>
+      <p className={`mt-2 text-xs ${theme.subtleText}`}>Basado en tus intereses guardados.</p>
 
       <div className="mt-5 sm:mt-6 space-y-8 sm:space-y-10">
         {topics.map((t) => {
@@ -413,9 +391,7 @@ function ShortsBlock({
                     onClick={() => setActive(v)}
                     className={`w-[140px] sm:w-[150px] shrink-0 snap-start text-left rounded-2xl sm:rounded-3xl border p-2 transition hover:opacity-95 ${theme.card}`}
                   >
-                    <div
-                      className={`overflow-hidden rounded-2xl border ${theme.cardAlt}`}
-                    >
+                    <div className={`overflow-hidden rounded-2xl border ${theme.cardAlt}`}>
                       <div className="relative aspect-[9/16] w-full">
                         {v.thumbnail ? (
                           // eslint-disable-next-line @next/next/no-img-element
@@ -437,12 +413,8 @@ function ShortsBlock({
                       </div>
                     </div>
 
-                    <p className="mt-2 text-xs font-semibold line-clamp-2">
-                      {v.title}
-                    </p>
-                    <p
-                      className={`mt-1 text-[11px] ${theme.subtleText} line-clamp-1`}
-                    >
+                    <p className="mt-2 text-xs font-semibold line-clamp-2">{v.title}</p>
+                    <p className={`mt-1 text-[11px] ${theme.subtleText} line-clamp-1`}>
                       {v.channelTitle}
                     </p>
                   </button>
@@ -450,8 +422,7 @@ function ShortsBlock({
 
                 {!loading && items.length === 0 && (
                   <p className={`text-xs ${theme.subtleText}`}>
-                    No encontré Shorts para “{t}”. Probá refrescar o cambiar el
-                    interés.
+                    No encontré Shorts para “{t}”. Probá refrescar o cambiar el interés.
                   </p>
                 )}
               </div>
@@ -493,6 +464,12 @@ export default function Home() {
   const [selectedServerName, setSelectedServerName] = useState<string>("");
   const [selectedChannelName, setSelectedChannelName] = useState<string>("");
 
+  // ✅ NUEVO: pestaña desplegable + “solo guardar si cambió”
+  const [discordConfigOpen, setDiscordConfigOpen] = useState(false);
+  const [savedChannelId, setSavedChannelId] = useState<string>("");
+  const [savedChannelName, setSavedChannelName] = useState<string>("");
+  const [savingChannel, setSavingChannel] = useState(false);
+
   // ✅ Recomendación automática
   const [autoRecEnabled, setAutoRecEnabled] = useState(false);
   const [autoRecExpanded, setAutoRecExpanded] = useState(false);
@@ -517,6 +494,9 @@ export default function Home() {
   const isLogged = !!user;
   const sendLabel = "Enviar";
   const sendDisabled = !canSendLink;
+
+  const hasUnsavedChannelChange =
+    discordConnected && !!selectedChannel && selectedChannel !== savedChannelId;
 
   // ✅✅✅ TEMA: leer al montar
   useEffect(() => {
@@ -613,6 +593,16 @@ export default function Home() {
           if (data.selectedChannel?.id) {
             setSelectedChannel(data.selectedChannel.id);
             setSelectedChannelName(data.selectedChannel.name || "");
+
+            // ✅ guardar “lo persistido”
+            setSavedChannelId(data.selectedChannel.id);
+            setSavedChannelName(data.selectedChannel.name || "");
+
+            // ✅ si ya hay canal guardado, arrancamos cerrado
+            setDiscordConfigOpen(false);
+          } else {
+            // ✅ si falta canal, abrimos la pestaña
+            setDiscordConfigOpen(true);
           }
         }
       } catch (error) {
@@ -633,13 +623,14 @@ export default function Home() {
 
     if (discordDataParam) {
       try {
-        const data = JSON.parse(
-          decodeURIComponent(discordDataParam)
-        ) as DiscordCallbackData;
+        const data = JSON.parse(decodeURIComponent(discordDataParam)) as DiscordCallbackData;
 
         setDiscordData(data);
         setDiscordServers(data.servers || []);
         setDiscordConnected(true);
+
+        // ✅ abrir pestaña al conectar
+        setDiscordConfigOpen(true);
 
         // ✅ server donde se agregó el bot → lo dejamos como server “fijo”
         const guildId = data.guildId || "";
@@ -683,8 +674,7 @@ export default function Home() {
         const { db } = await import("../lib/firebaseClient");
 
         const gid = data.guildId || null;
-        const serverForBot =
-          gid && (data.servers || []).find((x) => x.id === gid);
+        const serverForBot = gid && (data.servers || []).find((x) => x.id === gid);
 
         await setDoc(
           doc(db, "users", user.uid),
@@ -696,16 +686,12 @@ export default function Home() {
             discordTokens: {
               accessToken: data.accessToken,
               refreshToken: data.refreshToken,
-              expiresAt: new Date(
-                Date.now() + data.expiresIn * 1000
-              ).toISOString(),
+              expiresAt: new Date(Date.now() + data.expiresIn * 1000).toISOString(),
             },
             discordServers: data.servers,
 
             // ✅ guardamos el server “fijo” donde se agregó el bot
-            ...(serverForBot
-              ? { selectedServer: { id: serverForBot.id, name: serverForBot.name } }
-              : {}),
+            ...(serverForBot ? { selectedServer: { id: serverForBot.id, name: serverForBot.name } } : {}),
           },
           { merge: true }
         );
@@ -732,41 +718,38 @@ export default function Home() {
   }, [user, saveToFirestore]);
 
   // ✅ cargar canales (server fijo)
-  const loadChannelsForServer = useCallback(
-    async (serverId: string) => {
-      if (!serverId) return;
+  const loadChannelsForServer = useCallback(async (serverId: string) => {
+    if (!serverId) return;
 
-      const cached = channelsCacheRef.current.get(serverId);
-      if (cached) {
-        setChannels(cached);
-        return;
+    const cached = channelsCacheRef.current.get(serverId);
+    if (cached) {
+      setChannels(cached);
+      return;
+    }
+
+    setLoadingChannels(true);
+    try {
+      const response = await fetch("/api/discord/channels", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ serverId }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.channels) {
+        const list = data.channels as DiscordChannel[];
+        setChannels(list);
+        channelsCacheRef.current.set(serverId, list);
+      } else {
+        setStatus("❌ Error obteniendo canales del servidor");
       }
-
-      setLoadingChannels(true);
-      try {
-        const response = await fetch("/api/discord/channels", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ serverId }),
-        });
-
-        const data = await response.json();
-
-        if (response.ok && data.channels) {
-          const list = data.channels as DiscordChannel[];
-          setChannels(list);
-          channelsCacheRef.current.set(serverId, list);
-        } else {
-          setStatus("❌ Error obteniendo canales del servidor");
-        }
-      } catch {
-        setStatus("❌ Error obteniendo canales");
-      } finally {
-        setLoadingChannels(false);
-      }
-    },
-    []
-  );
+    } catch {
+      setStatus("❌ Error obteniendo canales");
+    } finally {
+      setLoadingChannels(false);
+    }
+  }, []);
 
   // ✅ si hay discord conectado y server seleccionado, aseguramos canales cargados
   useEffect(() => {
@@ -795,6 +778,13 @@ export default function Home() {
       return;
     }
 
+    // ✅ si no cambió nada, no mostramos guardado ni hacemos request
+    if (selectedChannel === savedChannelId) {
+      setStatus("No hay cambios para guardar.");
+      return;
+    }
+
+    setSavingChannel(true);
     try {
       const { doc, setDoc } = await import("firebase/firestore");
       const { db } = await import("../lib/firebaseClient");
@@ -814,9 +804,17 @@ export default function Home() {
 
       setSelectedServerName(server?.name || selectedServerName);
       setSelectedChannelName(channel?.name || "");
+
+      // ✅ actualizar “persistido”
+      setSavedChannelId(selectedChannel);
+      setSavedChannelName(channel?.name || "");
+
       setStatus("✅ Canal guardado! Ya podés enviar videos.");
+      setDiscordConfigOpen(false);
     } catch {
       setStatus("❌ Error guardando el canal");
+    } finally {
+      setSavingChannel(false);
     }
   }, [
     channels,
@@ -825,6 +823,7 @@ export default function Home() {
     selectedServer,
     selectedServerName,
     user,
+    savedChannelId,
   ]);
 
   const toggleInterest = useCallback((tag: string) => {
@@ -1057,6 +1056,9 @@ export default function Home() {
       handleConnectDiscord();
       return;
     }
+
+    // ✅ abrir pestaña y scrollear
+    setDiscordConfigOpen(true);
     setDrawerOpen(false);
     setTimeout(() => {
       discordConfigRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -1163,9 +1165,7 @@ export default function Home() {
                       <div className="flex gap-3">
                         <div
                           className={`mt-0.5 h-7 w-7 rounded-full flex items-center justify-center ${
-                            isLight
-                              ? "bg-[#5b21b6]/10 text-[#2b0a5a]/80"
-                              : "bg-white/10 text-white/75"
+                            isLight ? "bg-[#5b21b6]/10 text-[#2b0a5a]/80" : "bg-white/10 text-white/75"
                           }`}
                         >
                           1
@@ -1181,9 +1181,7 @@ export default function Home() {
                       <div className="flex gap-3">
                         <div
                           className={`mt-0.5 h-7 w-7 rounded-full flex items-center justify-center ${
-                            isLight
-                              ? "bg-[#5b21b6]/10 text-[#2b0a5a]/80"
-                              : "bg-white/10 text-white/75"
+                            isLight ? "bg-[#5b21b6]/10 text-[#2b0a5a]/80" : "bg-white/10 text-white/75"
                           }`}
                         >
                           2
@@ -1191,7 +1189,7 @@ export default function Home() {
                         <div>
                           <p className="font-medium">Conectás Discord</p>
                           <p className={`${theme.subtleText} text-xs mt-0.5`}>
-                            Agregás el bot al servidor y elegís el canal destino.
+                            Agregás el bot a tu servidor y elegís el canal destino.
                           </p>
                         </div>
                       </div>
@@ -1199,9 +1197,7 @@ export default function Home() {
                       <div className="flex gap-3">
                         <div
                           className={`mt-0.5 h-7 w-7 rounded-full flex items-center justify-center ${
-                            isLight
-                              ? "bg-[#5b21b6]/10 text-[#2b0a5a]/80"
-                              : "bg-white/10 text-white/75"
+                            isLight ? "bg-[#5b21b6]/10 text-[#2b0a5a]/80" : "bg-white/10 text-white/75"
                           }`}
                         >
                           3
@@ -1216,17 +1212,11 @@ export default function Home() {
                     </div>
 
                     <div className={`mt-6 rounded-2xl border p-4 ${theme.tipBox}`}>
-                      <p
-                        className={`text-xs ${
-                          isLight ? "text-[#2b0a5a]/70" : "text-white/60"
-                        }`}
-                      >
+                      <p className={`text-xs ${isLight ? "text-[#2b0a5a]/70" : "text-white/60"}`}>
                         Tip: armate un canal tipo{" "}
                         <span
                           className={
-                            isLight
-                              ? "text-[#5b21b6] font-medium"
-                              : "text-white/85 font-medium"
+                            isLight ? "text-[#5b21b6] font-medium" : "text-white/85 font-medium"
                           }
                         >
                           #para-reaccionar
@@ -1290,12 +1280,8 @@ export default function Home() {
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className={`text-xs ${theme.subtleText}`}>Cuenta</p>
-                      <p className="mt-1 text-base font-semibold">
-                        {user?.displayName || "Invitado"}
-                      </p>
-                      {user?.email && (
-                        <p className={`text-xs ${theme.subtleText}`}>{user.email}</p>
-                      )}
+                      <p className="mt-1 text-base font-semibold">{user?.displayName || "Invitado"}</p>
+                      {user?.email && <p className={`text-xs ${theme.subtleText}`}>{user.email}</p>}
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -1324,16 +1310,11 @@ export default function Home() {
                         <p className={`mt-1 text-sm ${theme.bodyText}`}>
                           {discordConnected ? "✅ Conectado" : "⚠️ No conectado"}
                         </p>
-                        <p className={`mt-1 text-xs ${theme.subtleText}`}>
-                          Destino: {destinationText}
-                        </p>
+                        <p className={`mt-1 text-xs ${theme.subtleText}`}>Destino: {destinationText}</p>
                       </div>
 
                       <span
-                        className={[
-                          "text-xs rounded-full px-3 py-1 font-medium border",
-                          theme.chip,
-                        ].join(" ")}
+                        className={["text-xs rounded-full px-3 py-1 font-medium border", theme.chip].join(" ")}
                       >
                         {discordConnected ? "On" : "Off"}
                       </span>
@@ -1456,14 +1437,17 @@ export default function Home() {
 
               {/* BODY */}
               <div className="mt-8 sm:mt-10 space-y-5 sm:space-y-6">
-                {/* ✅✅✅ NUEVO: selector de canal SIEMPRE visible si Discord está conectado */}
+                {/* ✅✅✅ Selector de canal (pestaña) SIEMPRE visible si Discord está conectado */}
                 {discordConnected && (
-                  <div
-                    ref={discordConfigRef}
-                    className={`rounded-2xl sm:rounded-3xl border p-4 sm:p-6 ${theme.cardAlt}`}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
+                  <div ref={discordConfigRef} className={`rounded-2xl sm:rounded-3xl border ${theme.cardAlt}`}>
+                    {/* header clickable */}
+                    <button
+                      type="button"
+                      onClick={() => setDiscordConfigOpen((v) => !v)}
+                      className="w-full px-4 py-4 sm:px-6 sm:py-5 flex items-center justify-between gap-3"
+                      aria-expanded={discordConfigOpen}
+                    >
+                      <div className="text-left">
                         <p
                           className={`text-sm font-semibold ${
                             isLight ? "text-[#2b0a5a]" : "text-white/90"
@@ -1474,65 +1458,87 @@ export default function Home() {
                         <p className={`mt-1 text-xs ${theme.subtleText}`}>
                           {selectedServerName ? `Servidor: ${selectedServerName}` : "Servidor conectado"}
                           {" · "}Destino actual:{" "}
-                          <span className="font-medium">{selectedChannelName ? `#${selectedChannelName}` : "—"}</span>
+                          <span className="font-medium">
+                            {selectedChannelName ? `#${selectedChannelName}` : "—"}
+                          </span>
+                          {hasUnsavedChannelChange && (
+                            <span className="ml-2 font-semibold">· Cambios sin guardar</span>
+                          )}
                         </p>
                       </div>
 
                       <span
                         className={[
-                          "text-xs rounded-full px-3 py-1 font-medium border",
+                          "shrink-0 text-xs rounded-full px-3 py-1 font-medium border",
                           theme.chip,
                         ].join(" ")}
                       >
-                        {selectedChannel ? "Canal listo" : "Falta canal"}
+                        {savedChannelId ? "Canal listo" : selectedChannel ? "Listo (no guardado)" : "Falta canal"}
                       </span>
-                    </div>
 
-                    <div className="mt-4 space-y-3">
-                      <label
-                        className={`block text-sm ${
-                          isLight ? "text-[#2b0a5a]/70" : "text-white/70"
-                        }`}
-                      >
-                        Canal
-                      </label>
+                      <span className={`ml-2 shrink-0 text-sm ${theme.subtleText}`}>
+                        {discordConfigOpen ? "▴" : "▾"}
+                      </span>
+                    </button>
 
-                      <select
-                        value={selectedChannel}
-                        onChange={(e) => handleChannelChange(e.target.value)}
-                        disabled={loadingChannels}
-                        className={`w-full rounded-2xl border px-4 py-3 outline-none transition ${theme.input} disabled:opacity-50`}
-                      >
-                        <option value="">
-                          {loadingChannels ? "Cargando canales..." : "Seleccioná un canal..."}
-                        </option>
-                        {channels.map((channel) => (
-                          <option key={channel.id} value={channel.id}>
-                            # {channel.name}
-                          </option>
-                        ))}
-                      </select>
+                    {discordConfigOpen && (
+                      <div className="px-4 pb-4 sm:px-6 sm:pb-6">
+                        <div className="pt-2 space-y-3">
+                          <label
+                            className={`block text-sm ${
+                              isLight ? "text-[#2b0a5a]/70" : "text-white/70"
+                            }`}
+                          >
+                            Canal
+                          </label>
 
-                      <button
-                        onClick={() => void handleSaveChannelSelection()}
-                        disabled={!selectedChannel || !user}
-                        className={[
-                          "w-full rounded-2xl px-6 py-3 font-medium transition disabled:opacity-40 disabled:cursor-not-allowed",
-                          theme.btnPrimary,
-                        ].join(" ")}
-                        type="button"
-                      >
-                        Guardar canal
-                      </button>
+                          <select
+                            value={selectedChannel}
+                            onChange={(e) => handleChannelChange(e.target.value)}
+                            disabled={loadingChannels}
+                            className={`w-full rounded-2xl border px-4 py-3 outline-none transition ${theme.input} disabled:opacity-50`}
+                          >
+                            <option value="">
+                              {loadingChannels ? "Cargando canales..." : "Seleccioná un canal..."}
+                            </option>
+                            {channels.map((channel) => (
+                              <option key={channel.id} value={channel.id}>
+                                # {channel.name}
+                              </option>
+                            ))}
+                          </select>
 
-                      <p className={`text-xs ${theme.subtleText}`}>
-                        Podés cambiar el canal cuando quieras. El servidor es el mismo donde agregaste el bot.
-                      </p>
-                    </div>
+                          {/* ✅ botón solo si hubo cambios */}
+                          {hasUnsavedChannelChange && (
+                            <button
+                              onClick={() => void handleSaveChannelSelection()}
+                              disabled={!selectedChannel || !user || savingChannel}
+                              className={[
+                                "w-full rounded-2xl px-6 py-3 font-medium transition disabled:opacity-40 disabled:cursor-not-allowed",
+                                theme.btnPrimary,
+                              ].join(" ")}
+                              type="button"
+                            >
+                              {savingChannel ? "Guardando..." : "Guardar canal"}
+                            </button>
+                          )}
+
+                          <p className={`text-xs ${theme.subtleText}`}>
+                            Podés cambiar el canal cuando quieras. El servidor es el mismo donde agregaste el bot.
+                            {savedChannelName && (
+                              <>
+                                {" "}
+                                (Guardado: <span className="font-medium">#{savedChannelName}</span>)
+                              </>
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
-                {/* Si NO está conectado, mantenemos un CTA simple */}
+                {/* Si NO está conectado, CTA simple */}
                 {!discordConnected && user && (
                   <div className={`rounded-2xl sm:rounded-3xl border p-4 sm:p-6 ${theme.cardAlt}`}>
                     <p className="text-sm font-semibold">Conectá Discord</p>
@@ -1542,10 +1548,9 @@ export default function Home() {
                     <button
                       type="button"
                       onClick={handleConnectDiscord}
-                      className={[
-                        "mt-4 w-full rounded-2xl px-6 py-3 font-medium transition",
-                        theme.btnPrimary,
-                      ].join(" ")}
+                      className={["mt-4 w-full rounded-2xl px-6 py-3 font-medium transition", theme.btnPrimary].join(
+                        " "
+                      )}
                     >
                       Conectar Discord
                     </button>
@@ -1565,20 +1570,11 @@ export default function Home() {
                   <div className={isLocked ? "pointer-events-none select-none" : ""}>
                     <div className="mt-1">
                       <div className="flex items-center justify-between gap-3 mb-2">
-                        <label
-                          className={`block text-sm ${
-                            isLight ? "text-[#2b0a5a]/70" : "text-white/70"
-                          }`}
-                        >
+                        <label className={`block text-sm ${isLight ? "text-[#2b0a5a]/70" : "text-white/70"}`}>
                           Link del video
                         </label>
                         {clipboardState === "valid" && !!clipboardText && (
-                          <span
-                            className={[
-                              "text-xs rounded-full px-3 py-1 font-medium",
-                              theme.pasteReady,
-                            ].join(" ")}
-                          >
+                          <span className={["text-xs rounded-full px-3 py-1 font-medium", theme.pasteReady].join(" ")}>
                             Listo ✅
                           </span>
                         )}
@@ -1617,13 +1613,9 @@ export default function Home() {
                       </button>
 
                       {status && (
-                        <p className={`mt-3 text-sm ${isLight ? "text-[#2b0a5a]/60" : "text-white/60"}`}>
-                          {status}
-                        </p>
+                        <p className={`mt-3 text-sm ${isLight ? "text-[#2b0a5a]/60" : "text-white/60"}`}>{status}</p>
                       )}
-                      {domain && (
-                        <p className={`mt-2 text-xs ${theme.subtleText}`}>Detectado: {domain}</p>
-                      )}
+                      {domain && <p className={`mt-2 text-xs ${theme.subtleText}`}>Detectado: {domain}</p>}
                     </div>
                   </div>
 
@@ -1638,6 +1630,7 @@ export default function Home() {
                           } else {
                             if (!discordConnected) handleConnectDiscord();
                             else {
+                              setDiscordConfigOpen(true);
                               discordConfigRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
                             }
                           }
@@ -1729,10 +1722,7 @@ export default function Home() {
                                 key={tag}
                                 type="button"
                                 onClick={() => toggleInterest(tag)}
-                                className={[
-                                  "rounded-full border px-3 py-1 text-xs font-medium transition",
-                                  theme.chip,
-                                ].join(" ")}
+                                className={["rounded-full border px-3 py-1 text-xs font-medium transition", theme.chip].join(" ")}
                                 title="Quitar"
                                 disabled={isLocked}
                               >
@@ -1744,9 +1734,7 @@ export default function Home() {
 
                         <div className="mt-4 flex flex-wrap gap-2">
                           {INTERESES_SUGERIDOS.map((x) => {
-                            const selected = interests.some(
-                              (t) => t.toLowerCase() === x.toLowerCase()
-                            );
+                            const selected = interests.some((t) => t.toLowerCase() === x.toLowerCase());
                             const disabled = (!selected && interests.length >= 8) || isLocked;
 
                             return (
@@ -1834,9 +1822,7 @@ export default function Home() {
         >
           <div className="flex flex-col gap-1">
             <p className="text-sm font-semibold">StreamersCreators</p>
-            <p className={`text-xs ${theme.footerText}`}>
-              Convertí links virales en contenido listo para reaccionar.
-            </p>
+            <p className={`text-xs ${theme.footerText}`}>Convertí links virales en contenido listo para reaccionar.</p>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
@@ -1844,10 +1830,7 @@ export default function Home() {
               <button
                 type="button"
                 onClick={openHowModal}
-                className={[
-                  "rounded-2xl border px-4 py-2 text-sm font-medium transition",
-                  theme.btnSecondary,
-                ].join(" ")}
+                className={["rounded-2xl border px-4 py-2 text-sm font-medium transition", theme.btnSecondary].join(" ")}
               >
                 Cómo funciona
               </button>
@@ -1855,10 +1838,7 @@ export default function Home() {
               <button
                 type="button"
                 onClick={openDiscordSetup}
-                className={[
-                  "rounded-2xl border px-4 py-2 text-sm font-medium transition",
-                  theme.btnSecondary,
-                ].join(" ")}
+                className={["rounded-2xl border px-4 py-2 text-sm font-medium transition", theme.btnSecondary].join(" ")}
               >
                 Discord
               </button>
@@ -1866,28 +1846,18 @@ export default function Home() {
               <button
                 type="button"
                 onClick={() => setDrawerOpen(true)}
-                className={[
-                  "rounded-2xl border px-4 py-2 text-sm font-medium transition",
-                  theme.btnSecondary,
-                ].join(" ")}
+                className={["rounded-2xl border px-4 py-2 text-sm font-medium transition", theme.btnSecondary].join(" ")}
               >
                 Menú
               </button>
             </div>
 
             <span
-              className={[
-                "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs",
-                theme.chip,
-              ].join(" ")}
+              className={["inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs", theme.chip].join(" ")}
             >
               <span className="text-sm">{user ? "👤" : "🔒"}</span>
               <span className="font-medium">{user ? "Sesión activa" : "Sin sesión"}</span>
-              {user && (
-                <span className={theme.subtleText}>
-                  · {selectedChannel ? "Canal listo" : "Falta canal"}
-                </span>
-              )}
+              {user && <span className={theme.subtleText}>· {selectedChannel ? "Canal listo" : "Falta canal"}</span>}
             </span>
           </div>
         </footer>
