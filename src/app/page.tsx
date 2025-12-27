@@ -202,7 +202,7 @@ function ShortsBlock({
   // ✅ NUEVO: track de thumbnails cargadas por id (para mostrar spinner por video)
   const [thumbLoaded, setThumbLoaded] = useState<Record<string, boolean>>({});
 
-  // ✅ detectar “light” sin pasar props extra
+  // ✅ detectar "light" sin pasar props extra
   const isLight = theme.pageBg.includes("bg-white");
   const spinnerBubbleClass = isLight ? "bg-white/85 text-[#5b21b6]" : "bg-black/55 text-white";
 
@@ -237,7 +237,7 @@ function ShortsBlock({
         for (const [t, items] of results) next[t] = items;
         setByTopic(next);
 
-        // ✅ NUEVO: resetear loaded para los nuevos items (evita “stale”)
+        // ✅ NUEVO: resetear loaded para los nuevos items (evita "stale")
         const ids = results.flatMap(([, items]) => items.map((x) => x.id));
         setThumbLoaded((prev) => {
           const nextLoaded: Record<string, boolean> = {};
@@ -268,7 +268,7 @@ function ShortsBlock({
         const items = await fetchTopic(t);
         setByTopic((prev) => ({ ...prev, [t]: items }));
 
-        // ✅ NUEVO: al refrescar, marcamos esos ids como “no cargados” para que se vea el spinner
+        // ✅ NUEVO: al refrescar, marcamos esos ids como "no cargados" para que se vea el spinner
         setThumbLoaded((prev) => {
           const copy = { ...prev };
           for (const it of items) copy[it.id] = false;
@@ -468,7 +468,7 @@ function ShortsBlock({
 
                 {!loading && items.length === 0 && (
                   <p className={`text-xs ${theme.subtleText}`}>
-                    No encontré Shorts para “{t}”. Probá refrescar o cambiar el interés.
+                    No encontré Shorts para "{t}". Probá refrescar o cambiar el interés.
                   </p>
                 )}
               </div>
@@ -512,7 +512,7 @@ export default function Home() {
   const [selectedServerName, setSelectedServerName] = useState<string>("");
   const [selectedChannelName, setSelectedChannelName] = useState<string>("");
 
-  // ✅ NUEVO: pestaña desplegable + “solo guardar si cambió”
+  // ✅ NUEVO: pestaña desplegable + "solo guardar si cambió"
   const [discordConfigOpen, setDiscordConfigOpen] = useState(false);
   const [savedChannelId, setSavedChannelId] = useState<string>("");
   const [savedChannelName, setSavedChannelName] = useState<string>("");
@@ -528,7 +528,7 @@ export default function Home() {
   const channelsCacheRef = useRef<Map<string, DiscordChannel[]>>(new Map());
   const lastCheckRef = useRef<number>(0);
 
-  // ✅ para scroll cuando el usuario toca “Cambiar canal”
+  // ✅ para scroll cuando el usuario toca "Cambiar canal"
   const discordConfigRef = useRef<HTMLDivElement | null>(null);
 
   const theme = isLight ? THEMES.light : THEMES.dark;
@@ -549,7 +549,7 @@ export default function Home() {
   // ✅ auth loading (hydrating)
   const authHydrating = loading;
 
-  // ✅ NUEVO: hidratación del perfil (Firestore) para evitar “flash” de Conectar Discord
+  // ✅ NUEVO: hidratación del perfil (Firestore) para evitar "flash" de Conectar Discord
   const [profileHydrating, setProfileHydrating] = useState(true);
 
   // ✅✅✅ TEMA: leer al montar
@@ -656,7 +656,7 @@ export default function Home() {
             setSelectedChannel(data.selectedChannel.id);
             setSelectedChannelName(data.selectedChannel.name || "");
 
-            // ✅ guardar “lo persistido”
+            // ✅ guardar "lo persistido"
             setSavedChannelId(data.selectedChannel.id);
             setSavedChannelName(data.selectedChannel.name || "");
 
@@ -1168,6 +1168,59 @@ export default function Home() {
 
   return (
     <main className={`min-h-screen ${theme.pageBg}`}>
+      {/* ✅ Contenido SEO - Visible para buscadores, oculto visualmente */}
+    <section className="sr-only" aria-hidden="true">
+      <h1>StreamersCreators - Hazte viral reaccionando a los videos del momento</h1>
+      
+      <h2>Descubre clips virales antes que nadie</h2>
+      <p>
+        StreamersCreators es la herramienta definitiva para streamers y creadores de contenido 
+        que buscan contenido viral para reaccionar. Recibe notificaciones automáticas en Discord 
+        con los clips más virales de Kick, Twitch y YouTube del momento.
+      </p>
+      
+      <h3>¿Por qué usar StreamersCreators?</h3>
+      <ul>
+        <li>Descubre contenido viral antes que otros streamers</li>
+        <li>Notificaciones instantáneas en tu servidor de Discord</li>
+        <li>Clips de las mejores plataformas: Kick, Twitch y YouTube</li>
+        <li>Aumenta tus views reaccionando a tendencias</li>
+        <li>Configuración simple en menos de 2 minutos</li>
+        <li>Completamente gratis para streamers</li>
+      </ul>
+      
+      <h3>Cómo funciona</h3>
+      <p>
+        Conecta tu cuenta de Discord, selecciona el canal donde quieres recibir las notificaciones, 
+        y comienza a recibir los clips más virales del momento. Cada vez que un video se vuelve 
+        viral en Kick, Twitch o YouTube, lo recibirás al instante en tu Discord para que puedas 
+        reaccionar antes que nadie.
+      </p>
+      
+      <h3>Para streamers de Kick, Twitch y YouTube</h3>
+      <p>
+        No importa en qué plataforma hagas stream. StreamersCreators te trae el mejor contenido 
+        viral de todas las plataformas principales. Ideal para streamers que buscan aumentar su 
+        engagement mediante reacciones a contenido trending.
+      </p>
+      
+      <h3>Bot de Discord para creadores de contenido</h3>
+      <p>
+        Nuestro bot de Discord está optimizado para streamers. Comparte automáticamente los mejores 
+        clips virales en el canal que elijas. Perfecto para tener siempre contenido fresco para 
+        reaccionar en tu stream.
+      </p>
+      
+      <h3>Características principales</h3>
+      <ul>
+        <li>Integración completa con Discord para streamers</li>
+        <li>Soporte para múltiples plataformas: Kick, Twitch, YouTube</li>
+        <li>Recomendaciones personalizadas basadas en tus intereses</li>
+        <li>Interfaz simple y fácil de usar</li>
+        <li>Actualizaciones en tiempo real de contenido viral</li>
+        <li>Sin costos - completamente gratuito para creadores</li>
+      </ul>
+    </section>
       {/* glows */}
       <div className="pointer-events-none fixed inset-0 opacity-80">
         <div
