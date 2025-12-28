@@ -107,6 +107,17 @@ function GoogleIcon({ className = "h-4 w-4" }: { className?: string }) {
   );
 }
 
+// ✅ NUEVO: Componente Menú Hamburguesa animado
+function HamburgerIcon({ isOpen, className = "" }: { isOpen: boolean; className?: string }) {
+  return (
+    <div className={`hamburger-menu ${isOpen ? "open" : ""} ${className}`}>
+      <div className="hamburger-line" />
+      <div className="hamburger-line" />
+      <div className="hamburger-line" />
+    </div>
+  );
+}
+
 const THEMES = {
   light: {
     pageBg: "bg-white text-[#2b0a5a]",
@@ -551,6 +562,16 @@ export default function Home() {
 
   // ✅ NUEVO: hidratación del perfil (Firestore) para evitar "flash" de Conectar Discord
   const [profileHydrating, setProfileHydrating] = useState(true);
+
+  // ✅ Animación: remover clase de carga inicial
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      document.querySelectorAll('.animate-on-load').forEach((el) => {
+        el.classList.remove('animate-on-load');
+      });
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   // ✅✅✅ TEMA: leer al montar
   useEffect(() => {
@@ -1241,7 +1262,7 @@ export default function Home() {
         >
 {/* ✅ Drawer */}
 {drawerOpen && (
-  <div className="absolute sm:fixed inset-0 z-[70]">
+  <div className="absolute sm:fixed inset-0 z-[70] overlay-enter">
     <button
       aria-label="Cerrar menú"
       onClick={() => setDrawerOpen(false)}
@@ -1255,6 +1276,7 @@ export default function Home() {
 
     <aside
       className={[
+        "drawer-enter",
         "absolute sm:fixed right-0 top-0 h-full",
         // ✅ ancho estable: mobile full / desktop fijo
         "w-full sm:w-[420px] md:w-[460px]",
@@ -1431,7 +1453,8 @@ export default function Home() {
             type="button"
             onClick={() => setIsLight((v) => !v)}
             className={[
-              "relative inline-flex h-8 w-14 items-center rounded-full border transition",
+              "toggle-switch",
+              "relative inline-flex h-8 w-14 items-center rounded-full border",
               !isLight ? theme.toggleOnTrack : theme.toggleOffTrack,
             ].join(" ")}
             aria-label="Cambiar tema"
@@ -1439,7 +1462,8 @@ export default function Home() {
           >
             <span
               className={[
-                "inline-block h-6 w-6 transform rounded-full transition",
+                "toggle-knob",
+                "inline-block h-6 w-6 transform rounded-full",
                 !isLight ? "translate-x-7" : "translate-x-1",
                 !isLight ? theme.toggleOnKnob : theme.toggleOffKnob,
               ].join(" ")}
@@ -1459,9 +1483,9 @@ export default function Home() {
 )}
 
           <div className="px-4 py-8 sm:px-0 sm:py-0">
-            {/* ✅ Modal "Cómo funciona" */}
+           {/* ✅ Modal "Cómo funciona" */}
             {howModalOpen && (
-              <div className="fixed inset-0 z-[60]">
+              <div className="fixed inset-0 z-[60] overlay-enter">
                 <button
                   type="button"
                   aria-label="Cerrar modal"
@@ -1474,6 +1498,7 @@ export default function Home() {
                     aria-modal="true"
                     aria-label="Cómo funciona"
                     className={[
+                      "modal-enter",
                       "w-[92vw] max-w-lg border backdrop-blur-xl",
                       "rounded-[26px] sm:rounded-[34px]",
                       "p-5 sm:p-7",
@@ -1505,7 +1530,7 @@ export default function Home() {
                         isLight ? "text-[#2b0a5a]/75" : "text-white/70"
                       }`}
                     >
-                      <div className="flex gap-3">
+                      <div className="flex gap-3 animate-on-load animate-fade-in-up delay-100">
                         <div
                           className={`mt-0.5 h-7 w-7 rounded-full flex items-center justify-center ${
                             isLight
@@ -1523,7 +1548,7 @@ export default function Home() {
                         </div>
                       </div>
 
-                      <div className="flex gap-3">
+                      <div className="flex gap-3 animate-on-load animate-fade-in-up delay-200">
                         <div
                           className={`mt-0.5 h-7 w-7 rounded-full flex items-center justify-center ${
                             isLight
@@ -1541,7 +1566,7 @@ export default function Home() {
                         </div>
                       </div>
 
-                      <div className="flex gap-3">
+                      <div className="flex gap-3 animate-on-load animate-fade-in-up delay-300">
                         <div
                           className={`mt-0.5 h-7 w-7 rounded-full flex items-center justify-center ${
                             isLight
@@ -1615,7 +1640,7 @@ export default function Home() {
 
             {/* HEADER */}
             <div className="space-y-4">
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center justify-between gap-3 animate-on-load animate-fade-in-down">
                 <p className={`text-sm ${theme.subtleText}`}>StreamersCreators</p>
 
                 <button
@@ -1624,16 +1649,16 @@ export default function Home() {
                   type="button"
                   aria-label="Abrir menú"
                 >
-                  ☰
+                  <HamburgerIcon isOpen={drawerOpen} className="w-5 h-3.5" />
                 </button>
               </div>
 
-              <h1 className="text-4xl sm:text-6xl font-semibold tracking-tight leading-[1.05]">
+              <h1 className="text-4xl sm:text-6xl font-semibold tracking-tight leading-[1.05] animate-on-load animate-fade-in-up delay-100">
                 Convertí vídeos virales en contenido{" "}
                 <span className={theme.titleAccent}>listo para reaccionar</span>
               </h1>
 
-              <p className={`max-w-2xl text-base sm:text-lg ${theme.bodyText}`}>
+              <p className={`max-w-2xl text-base sm:text-lg ${theme.bodyText} animate-on-load animate-fade-in-up delay-200`}>
                 Pegá el link de TikTok, Reels o Shorts
                 <br />
                 Un bot se encargará de enviarte el vídeo para que reacciones!
@@ -1641,7 +1666,7 @@ export default function Home() {
 
               {/* ✅ botón solo si NO hay user y NO está hidratando */}
               {!user && !authHydrating && (
-                <div className="pt-2">
+                <div className="pt-2 animate-on-load animate-fade-in-up delay-300">
                   <button
                     type="button"
                     onClick={() => loginConGoogle()}
@@ -1687,7 +1712,7 @@ export default function Home() {
               {discordConnected && (
                 <div
                   ref={discordConfigRef}
-                  className={`rounded-2xl sm:rounded-3xl border ${theme.cardAlt}`}
+                  className={`rounded-2xl sm:rounded-3xl border ${theme.cardAlt} animate-on-load animate-fade-in-up delay-400`}
                 >
                   <button
                     type="button"
@@ -1776,7 +1801,7 @@ export default function Home() {
               {/* ✅✅✅ CTA: SOLO cuando ya terminó la hidratación del perfil */}
               {!discordConnected && user && !profileHydrating && !authHydrating && (
                 <div
-                  className={`rounded-2xl sm:rounded-3xl border p-4 sm:p-6 ${theme.cardAlt}`}
+                  className={`rounded-2xl sm:rounded-3xl border p-4 sm:p-6 ${theme.cardAlt} animate-on-load animate-fade-in-up delay-500`}
                 >
                   <p className="text-sm font-semibold">Conectá Discord</p>
                   <p className={`mt-1 text-xs ${theme.subtleText}`}>
@@ -1798,6 +1823,7 @@ export default function Home() {
               {/* ✅ Card principal */}
               <div
                 className={[
+                  "animate-on-load animate-fade-in-up delay-500",
                   "relative border",
                   "rounded-2xl sm:rounded-3xl",
                   "p-4 sm:p-6",
@@ -1929,6 +1955,7 @@ export default function Home() {
               {/* ✅ Bloque Recomendación automática */}
               <div
                 className={[
+                  "animate-on-load animate-fade-in-up delay-600",
                   "border",
                   "rounded-2xl sm:rounded-3xl",
                   "p-4 sm:p-6",
@@ -1963,7 +1990,8 @@ export default function Home() {
                         }
                       }}
                       className={[
-                        "relative inline-flex h-8 w-14 items-center rounded-full border transition",
+                        "toggle-switch",
+                        "relative inline-flex h-8 w-14 items-center rounded-full border",
                         "disabled:opacity-50 disabled:cursor-not-allowed",
                         autoRecEnabled ? theme.toggleOnTrack : theme.toggleOffTrack,
                       ].join(" ")}
@@ -1971,7 +1999,8 @@ export default function Home() {
                     >
                       <span
                         className={[
-                          "inline-block h-6 w-6 transform rounded-full transition",
+                          "toggle-knob",
+                          "inline-block h-6 w-6 transform rounded-full",
                           autoRecEnabled ? "translate-x-7" : "translate-x-1",
                           autoRecEnabled ? theme.toggleOnKnob : theme.toggleOffKnob,
                         ].join(" ")}
@@ -2093,6 +2122,7 @@ export default function Home() {
             {/* Footer */}
             <footer
               className={[
+                "animate-on-load animate-fade-in-up delay-700",
                 "mt-8 sm:mt-10 border",
                 "rounded-2xl sm:rounded-3xl",
                 "px-4 py-5 sm:px-6",
